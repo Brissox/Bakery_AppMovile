@@ -1,4 +1,4 @@
-package ui
+package cl.duoc.bakery_app.ui.principal
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*

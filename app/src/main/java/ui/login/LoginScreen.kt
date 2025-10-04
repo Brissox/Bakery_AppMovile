@@ -1,4 +1,4 @@
-package ui
+package cl.duoc.bakery_app.ui.login
 
 import android.util.Patterns
 import android.widget.Toast
