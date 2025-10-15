@@ -1,4 +1,4 @@
-package com.example.prueba.ui
+package com.example.prueba.ui.login
 
 import android.util.Patterns
 import android.widget.Toast
@@ -19,61 +19,31 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.prueba.R
 import com.google.firebase.auth.FirebaseAuth
-
+import ui.login.LoginUiState
 
 
 
 @OptIn(ExperimentalMaterial3Api::class) //@OptIn(ExperimentalMaterial3Api::class): avisas que usas componentes experimentales de Material3 (TopAppBar).
 @Composable //@Composable: indica que esta función dibuja UI en Compose.
 fun LoginScreen(
-    onBack: () -> Unit, //onBack: callback que se ejecuta al presionar “Atrás”.
-    onLoginSuccess: () -> Unit, // callback que se ejecuta si el login es exitoso.
-    //Un callback es simplemente una función que pasas como parámetro a otra función, para que esa función la ejecute en algún momento.
-    isPreview: Boolean = false
+    onBack: () -> Unit,
+    onLoginSuccess: () -> Unit,
+    vm: LoginViewModel = viewModel()
 ) {
-    val context = LocalContext.current // accede al contexto de Android (necesario para mostrar un Toast).
-    //crea o reutiliza una instancia de Firebase Auth para manejar login. remember { ... } asegura que la instancia no se recree en cada recomposición.
-    val auth = remember {
-        if (isPreview) null else FirebaseAuth.getInstance()
-    }
-    //Estados de la pantalla
-    var email by rememberSaveable { mutableStateOf("") } //almacenan lo que escribe el usuario. rememberSaveable guarda estado incluso si la actividad rota (ej: rotar pantalla).
-    var password by rememberSaveable { mutableStateOf("") } // almacenan lo que escribe el usuario. rememberSaveable guarda estado incluso si la actividad rota (ej: rotar pantalla).
-    var loading by remember { mutableStateOf(false) } //indica si se está ejecutando un login.
-    var errorMsg by remember { mutableStateOf<String?>(null) }  //mensaje de error (si hay).
 
-    //Función de validación
-    fun validar(): Boolean {
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            errorMsg = "Email inválido"
-            return false
+    val state by vm.ui.collectAsState()
+
+    LaunchedEffect(state.loggedIn) {
+        if (state.loggedIn) onLoginSuccess()
+    }
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(state.message) {
+        state.message?.let {
+            snackbarHostState.showSnackbar(it)
+            vm.messageConsumed()
         }
-        if (password.length < 6) {
-            errorMsg = "La clave debe tener al menos 6 caracteres"
-            return false
-        }
-        errorMsg = null
-        return true
     }
-
-    //Función de login
-    fun signIn() {
-        if (!validar()) return
-        loading = true
-        auth?.signInWithEmailAndPassword(email, password) // Llama a Firebase: signInWithEmailAndPassword.
-            ?.addOnCompleteListener { task ->
-                loading = false
-                if (task.isSuccessful) {
-                    Toast.makeText(context, "Ingreso exitoso", Toast.LENGTH_SHORT).show()
-                    onLoginSuccess()
-                } else {
-                    errorMsg = task.exception?.localizedMessage ?: "Error al iniciar sesión"
-                }
-            }
-    }
-
 
     //ui
     Scaffold(
@@ -119,8 +89,8 @@ fun LoginScreen(
                 )
 
                 OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
+                    value = state.email,
+                    onValueChange = vm::onEmailChange,
                     label = { Text("Correo electrónico") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -128,8 +98,8 @@ fun LoginScreen(
                 )
 
                 OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
+                    value = state.password,
+                    onValueChange = vm::onPasswordChange,
                     label = { Text("Contraseña") },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
@@ -137,34 +107,24 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                if (errorMsg != null) {
-                    Text(errorMsg!!, color = MaterialTheme.colorScheme.error)
+                if (state.error != null) {
+                    Text(state.error!!, color = MaterialTheme.colorScheme.error)
                 }
 
                 Button(
-                    onClick = { signIn() },
-                    enabled = !loading,
+                    onClick = vm::submit,
+                    enabled = !state.loading,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(if (loading) "Ingresando..." else "Ingresar")
+                    Text(if (state.loading) "Ingresando..." else "Ingresar")
                 }
             }
 
-            if (loading) {
+            if (state.loading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(48.dp)
                 )
             }
         }
     }
-}
-//ui
-@Preview(showBackground = true)
-@Composable
-fun LoginScreenPreview() {
-    LoginScreen(
-        onBack = {},
-        onLoginSuccess = {},
-        isPreview = true // Importante para que el preview funcione
-    )
 }

@@ -1,4 +1,4 @@
-package com.example.prueba.ui
+package com.example.prueba.ui.recover
 
 import android.util.Patterns
 import android.widget.Toast
@@ -19,45 +19,30 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.prueba.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecuperarPasswordScreen(
     onBack: () -> Unit,
     onSent: () -> Unit,
-    isPreview: Boolean = false
+    vm: RecuperarViewModel = viewModel()
 ) {
-    val context = LocalContext.current
 
-    val auth = remember {
-        if (isPreview) null else FirebaseAuth.getInstance()
+
+    val state by vm.ui.collectAsState()
+
+    // Navegación reactiva: si el correo fue enviado
+    LaunchedEffect(state.sent) {
+        if (state.sent) onSent()
     }
 
-    var email by rememberSaveable { mutableStateOf("") }
-    var loading by remember { mutableStateOf(false) }
-    var errorMsg by remember { mutableStateOf<String?>(null) }
-
-    fun validar(): Boolean {
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            errorMsg = "Email inválido"; return false
+    // Snackbar de mensajes
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(state.message) {
+        state.message?.let {
+            snackbarHostState.showSnackbar(it)
+            vm.messageConsumed()
         }
-        errorMsg = null; return true
-    }
-
-    fun sendReset() {
-        if (!validar()) return
-        loading = true
-        auth?.sendPasswordResetEmail(email)
-            ?.addOnCompleteListener { task ->
-                loading = false
-                if (task.isSuccessful) {
-                    Toast.makeText(context, "Correo de recuperación enviado.", Toast.LENGTH_SHORT).show()
-                    onSent()
-                } else {
-                    errorMsg = task.exception?.localizedMessage ?: "No se pudo enviar el correo"
-                }
-            }
     }
 
     Scaffold(
@@ -104,41 +89,32 @@ fun RecuperarPasswordScreen(
                 )
 
                 OutlinedTextField(
-                    value = email, onValueChange = { email = it },
+                    value = state.email,
+                    onValueChange = vm::onEmailChange,
                     label = { Text("Correo electrónico") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                if (errorMsg != null) {
-                    Text(errorMsg!!, color = MaterialTheme.colorScheme.error)
+                if (estate.error != null) {
+                    Text(estate.error!!, color = MaterialTheme.colorScheme.error)
                 }
 
                 Button(
-                    onClick = { sendReset() },
-                    enabled = !loading,
+                    onClick = vm::sendReset,
+                    enabled = !state.loading,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(if (loading) "Enviando..." else "Enviar correo de recuperación")
                 }
             }
 
-            if (loading) {
+            if (state.loading) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center).size(48.dp)
                 )
             }
         }
     }
-}
-@Preview(showBackground = true)
-@Composable
-fun RecuperarPasswordScreenPreview() {
-    RecuperarPasswordScreen(
-        onBack = {},
-        onSent = {},
-        isPreview = true
-
-    )
 }
