@@ -1,4 +1,4 @@
-package model
+package com.example.prueba.model
 import androidx.annotation.DrawableRes
 import com.example.prueba.R
 

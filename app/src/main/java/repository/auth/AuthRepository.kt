@@ -1,5 +1,6 @@
-package repository.auth
-import model.User
+package com.example.prueba.repository.auth
+import com.example.prueba.model.User
+
 
 class AuthRepository(
     private val ds: FirebaseAuthDataSource = FirebaseAuthDataSource()

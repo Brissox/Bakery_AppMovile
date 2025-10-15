@@ -1,4 +1,4 @@
-package ui.principal.components
+package com.example.prueba.ui.principal.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.MutableInteractionSource

@@ -1,4 +1,4 @@
-package model
+package com.example.prueba.model
 
 data class User(
     val uid: String? = null,

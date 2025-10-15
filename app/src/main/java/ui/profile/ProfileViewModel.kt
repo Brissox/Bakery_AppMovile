@@ -1,4 +1,4 @@
-package ui.profile
+package com.example.prueba.ui.profile
 
 
 import android.net.Uri

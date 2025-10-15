@@ -1,4 +1,4 @@
-package ui.principal
+package com.example.prueba.ui.principal
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

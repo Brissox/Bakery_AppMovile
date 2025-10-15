@@ -15,11 +15,14 @@ import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import ui.register.RegisterViewModel
+import com.example.prueba.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +53,7 @@ fun RegistrarseScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver"
                         )
                     }
@@ -86,20 +89,28 @@ fun RegistrarseScreen(
                 )
                 OutlinedTextField(
                     value = state.email,
-                    label = { Text("Correo electrónico") }, singleLine = true,
+                    onValueChange = vm::onEmailChange,
+                    label = { Text("Correo electrónico") },
+                    singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     modifier = Modifier.fillMaxWidth()
                 )
+
                 OutlinedTextField(
                     value = state.password,
-                    label = { Text("Contraseña") }, singleLine = true,
+                    onValueChange = vm::onPasswordChange,
+                    label = { Text("Contraseña") },
+                    singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     modifier = Modifier.fillMaxWidth()
                 )
+
                 OutlinedTextField(
                     value = state.confirm,
-                    label = { Text("Confirmar contraseña") }, singleLine = true,
+                    onValueChange = vm::onConfirmChange,
+                    label = { Text("Confirmar contraseña") },
+                    singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     modifier = Modifier.fillMaxWidth()
@@ -114,7 +125,7 @@ fun RegistrarseScreen(
                     enabled = !state.loading,
                     modifier = Modifier.fillMaxWidth()
                 )  {
-                    Text(if (loading) "Creando cuenta..." else "Crear cuenta")
+                    Text(if (state.loading) "Creando cuenta..." else "Crear cuenta")
                 }
             }
 

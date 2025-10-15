@@ -1,12 +1,15 @@
-package ui.login
+package com.example.prueba.ui.login
 
 import android.util.Patterns
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.prueba.model.User
+import com.example.prueba.repository.auth.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import model.User
+
 
 data class LoginUiState(
     val email: String = "",
@@ -18,34 +21,38 @@ data class LoginUiState(
     val message: String? = null   // para Snackbar one-shot (opcional)
 )
 
-private val _ui = MutableStateFlow(LoginUiState())
-val ui: StateFlow<LoginUiState> = _ui
+class LoginViewModel(
+    private val repo: AuthRepository = AuthRepository()
+) : ViewModel() {
 
-fun onEmailChange(v: String)    = _ui.update { it.copy(email = v, error = null, message = null) }
-fun onPasswordChange(v: String) = _ui.update { it.copy(password = v, error = null, message = null) }
+    private val _ui = MutableStateFlow(LoginUiState())
+    val ui: StateFlow<LoginUiState> = _ui
 
-private fun validar(): String? {
-    val s = _ui.value
-    if (!Patterns.EMAIL_ADDRESS.matcher(s.email).matches()) return "Email inválido"
-    if (s.password.length < 6) return "La clave debe tener al menos 6 caracteres"
-    return null
-}
+    fun onEmailChange(v: String)    = _ui.update { it.copy(email = v, error = null, message = null) }
+    fun onPasswordChange(v: String) = _ui.update { it.copy(password = v, error = null, message = null) }
 
-fun submit() {
-    val err = validar()
-    if (err != null) {
-        _ui.update { it.copy(error = err) }
-        return
+    private fun validar(): String? {
+        val s = _ui.value
+        if (!Patterns.EMAIL_ADDRESS.matcher(s.email).matches()) return "Email inválido"
+        if (s.password.length < 6) return "La clave debe tener al menos 6 caracteres"
+        return null
     }
-    viewModelScope.launch {
-        _ui.update { it.copy(loading = true, error = null, message = null) }
-        val user = repo.login(_ui.value.email, _ui.value.password)
-        _ui.update {
-            if (user != null) it.copy(loading = false, loggedIn = true, user = user, message = "Ingreso exitoso")
-            else it.copy(loading = false, error = "Error al iniciar sesión")
+
+    fun submit() {
+        val err = validar()
+        if (err != null) {
+            _ui.update { it.copy(error = err) }
+            return
+        }
+        viewModelScope.launch {
+            _ui.update { it.copy(loading = true, error = null, message = null) }
+            val user = repo.login(_ui.value.email, _ui.value.password)
+            _ui.update {
+                if (user != null) it.copy(loading = false, loggedIn = true, user = user, message = "Ingreso exitoso")
+                else it.copy(loading = false, error = "Error al iniciar sesión")
+            }
         }
     }
-}
 
-fun messageConsumed() { _ui.update { it.copy(message = null) } }
+    fun messageConsumed() { _ui.update { it.copy(message = null) } }
 }

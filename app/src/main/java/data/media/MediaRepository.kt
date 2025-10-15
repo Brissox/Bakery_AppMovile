@@ -1,4 +1,4 @@
-package data.media
+package com.example.prueba.data.media
 
 import android.content.ContentValues
 import android.content.Context
