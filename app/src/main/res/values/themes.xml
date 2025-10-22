@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-<<<<<<< HEAD
     <style name="Theme.Prueba" parent="android:Theme.Material.Light.NoActionBar" />
-=======
-    <style name="Theme.Bakery_app" parent="android:Theme.Material.Light.NoActionBar" />
->>>>>>> origin/main
 </resources>

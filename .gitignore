@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> origin/main
 *.iml
 .gradle
 /local.properties
@@ -17,9 +13,3 @@
 .externalNativeBuild
 .cxx
 local.properties
-<<<<<<< HEAD
-=======
-=======
-/build
->>>>>>> 4ac7660 (Se realizan mejoras visuales, junto con el funcionamiento de registrarse, login y recuperar contraseña. Tambien se agrega un mockup de tienda(Pagina principal despues del login).)
->>>>>>> origin/main
