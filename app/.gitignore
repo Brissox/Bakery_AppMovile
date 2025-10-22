@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 *.iml
 .gradle
@@ -16,3 +17,6 @@
 .google-services.json
 
 local.properties
+=======
+/build
+>>>>>>> origin/main

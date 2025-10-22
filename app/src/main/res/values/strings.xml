@@ -1,3 +1,7 @@
 <resources>
+<<<<<<< HEAD
     <string name="app_name">prueba</string>
+=======
+    <string name="app_name">Bakery_app</string>
+>>>>>>> origin/main
 </resources>
