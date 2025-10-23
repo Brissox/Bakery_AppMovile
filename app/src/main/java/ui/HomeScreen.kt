@@ -16,7 +16,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import cl.duoc.bakery_app.R
+import com.example.prueba.R
 
 
 
@@ -39,7 +39,7 @@ fun HomeScreen() {
             Button(onClick = { /*Accion Futura*/ }) {
                 Text("Presioname")
             }
-            Image(painter = painterResource(id = R.drawable.logopng),
+            Image(painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Logo App",
                 modifier = Modifier
                     .fillMaxWidth()
