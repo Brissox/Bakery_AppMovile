@@ -47,12 +47,12 @@ sealed class BottomItem(
     data object Home : BottomItem("home", "Inicio", Icons.Outlined.Home)
     data object Favs : BottomItem("favs", "Favoritos", Icons.Outlined.FavoriteBorder)
     data object Cart : BottomItem("cart", "Carrito", Icons.Outlined.ShoppingCart, badge = 3)
-    data object Clips : BottomItem("clips", "Clips", Icons.Outlined.PlayArrow)
+    data object Agenda : BottomItem("agenda", "Agenda", Icons.Outlined.PlayArrow)
     data object More : BottomItem("more", "Más", Icons.Outlined.Menu)
 }
 
 private val bottomItems = listOf(
-    BottomItem.Home, BottomItem.Favs, BottomItem.Cart, BottomItem.Clips, BottomItem.More
+    BottomItem.Home, BottomItem.Favs, BottomItem.Cart, BottomItem.Agenda, BottomItem.More
 )
 
 @Composable
@@ -242,12 +242,19 @@ fun PrincipalScreen(
                 }
             }
 
-            // CLIPS
-            composable(BottomItem.Clips.route) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Clips")
-                }
-            }
+            // AGENDA
+            composable(BottomItem.Agenda.route) {
+                val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+                if (uid == null) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("Debes iniciar sesión para ver tus recordatorios.")
+                    }
+                } else {
+                    val context = androidx.compose.ui.platform.LocalContext.current
+                    val factory = remember(uid) { com.example.prueba.ui.vmfactory.RecordatorioVMFactory(context, uid) }
+                    val rvm: com.example.prueba.ui.recordatorio.RecordatorioViewModel =
+                        androidx.lifecycle.viewmodel.compose.viewModel(factory = factory)
+                    com.example.prueba.ui.recordatorio.RecordatorioScreen(rvm)
 
             // MÁS
             composable(BottomItem.More.route) {
@@ -276,5 +283,7 @@ fun PrincipalScreen(
                 ProfileScreen(pvm)
             }
         }
+    }
+}
     }
 }
