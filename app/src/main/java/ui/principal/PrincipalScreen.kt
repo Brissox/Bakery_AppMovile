@@ -33,6 +33,8 @@ import com.example.prueba.ui.profile.ProfileScreen
 import com.example.prueba.ui.profile.ProfileViewModel
 import com.example.prueba.repository.auth.FirebaseAuthDataSource
 import com.example.prueba.data.media.MediaRepository
+import com.example.prueba.ui.carrito.CarritoScreen
+import com.example.prueba.ui.carrito.CartViewModel
 import com.example.prueba.vmfactory.ProfileVMFactory
 
 
@@ -113,6 +115,7 @@ fun PrincipalScreen(
 
     var expanded by remember { mutableStateOf(false) }
     val tabsNav = rememberNavController()
+    val cartViewModel: CartViewModel = viewModel()
 
     // Logout reactivo
     LaunchedEffect(state.loggedOut) {
@@ -219,7 +222,7 @@ fun PrincipalScreen(
                                 UiProductosCard(
                                     producto = producto,
                                     onAgregar = {
-                                        // TODO: vm.agregarAlCarrito(producto.id)
+                                        cartViewModel.agregarProducto(producto)
                                     }
                                 )
                             }
@@ -237,10 +240,10 @@ fun PrincipalScreen(
 
             // CARRITO
             composable(BottomItem.Cart.route) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Carrito")
-                }
+                // Instancia el ViewModel (vive mientras estés en la Activity)
+                CarritoScreen(cartViewModel = cartViewModel)
             }
+
 
             // AGENDA
             composable(BottomItem.Agenda.route) {

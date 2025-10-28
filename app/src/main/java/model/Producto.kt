@@ -1,6 +1,7 @@
 package com.example.prueba.model
 import androidx.annotation.DrawableRes
 import com.example.prueba.R
+import com.example.prueba.model.Producto
 
 data class Producto(
     val id: Int,
