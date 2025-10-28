@@ -15,9 +15,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.viewmodel.compose.viewModel
-import ui.recover.RecuperarViewModel
+import com.example.prueba.ui.recover.RecuperarViewModel
 import com.example.prueba.R
-import ui.home.components.AnimatedLogo
+import com.example.prueba.ui.home.components.AnimatedLogo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

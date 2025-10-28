@@ -1,4 +1,4 @@
-package ui.register
+package com.example.prueba.ui.register
 
 import android.util.Patterns
 import androidx.lifecycle.ViewModel

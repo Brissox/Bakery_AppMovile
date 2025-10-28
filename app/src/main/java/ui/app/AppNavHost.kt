@@ -1,4 +1,4 @@
-package ui.app
+package com.example.prueba.ui.app
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
@@ -10,7 +10,7 @@ import com.example.prueba.ui.login.LoginScreen
 import com.example.prueba.ui.principal.PrincipalScreen
 import com.example.prueba.ui.register.RegistrarseScreen
 import com.example.prueba.ui.recover.RecuperarPasswordScreen
-import ui.app.Route
+import com.example.prueba.ui.app.Route
 
 
 @OptIn(ExperimentalMaterial3Api::class)

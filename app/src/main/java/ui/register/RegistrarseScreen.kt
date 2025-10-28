@@ -21,9 +21,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
-import ui.register.RegisterViewModel
+import com.example.prueba.ui.register.RegisterViewModel
 import com.example.prueba.R
-import ui.home.components.AnimatedLogo
+import com.example.prueba.ui.home.components.AnimatedLogo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -16,7 +16,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import com.example.prueba.R
-import ui.home.components.AnimatedLogo
+import com.example.prueba.ui.home.components.AnimatedLogo
 
 
 @OptIn(ExperimentalMaterial3Api::class) //@OptIn(ExperimentalMaterial3Api::class): avisas que usas componentes experimentales de Material3 (TopAppBar).

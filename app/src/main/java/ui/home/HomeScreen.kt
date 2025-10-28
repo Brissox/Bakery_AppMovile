@@ -12,7 +12,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.prueba.R
-import ui.home.components.AnimatedLogo
+import com.example.prueba.ui.home.components.AnimatedLogo
 
 
 @OptIn(ExperimentalMaterial3Api::class)

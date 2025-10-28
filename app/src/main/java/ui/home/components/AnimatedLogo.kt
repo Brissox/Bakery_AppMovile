@@ -1,4 +1,4 @@
-package ui.home.components
+package com.example.prueba.ui.home.components
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
