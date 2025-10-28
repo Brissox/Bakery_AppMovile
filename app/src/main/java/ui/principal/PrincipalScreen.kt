@@ -2,6 +2,7 @@ package com.example.prueba.ui.principal
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -21,6 +22,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -33,6 +35,7 @@ import com.example.prueba.ui.profile.ProfileScreen
 import com.example.prueba.ui.profile.ProfileViewModel
 import com.example.prueba.repository.auth.FirebaseAuthDataSource
 import com.example.prueba.data.media.MediaRepository
+import com.example.prueba.ui.theme.PruebaTheme
 import com.example.prueba.vmfactory.ProfileVMFactory
 
 
@@ -125,10 +128,18 @@ fun PrincipalScreen(
         state.error?.let { snackbarHostState.showSnackbar(it) }
     }
 
+    val colorScheme = MaterialTheme.colorScheme
+
     Scaffold(
+        containerColor = colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Principal") },
+                title = { Text("Principal", color = colorScheme.onPrimary) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = colorScheme.primary,
+                    titleContentColor = colorScheme.onPrimary,
+                    actionIconContentColor = colorScheme.onPrimary
+                ),
                 actions = {
                     IconButton(onClick = { expanded = true }) {
                         Icon(Icons.Outlined.MoreVert, contentDescription = "Menú")
@@ -161,7 +172,52 @@ fun PrincipalScreen(
                 }
             )
         },
-        bottomBar = { BottomBar(tabsNav, onHomeTap = { vm.refreshHome() }) },
+        bottomBar = {
+            NavigationBar(
+                containerColor = colorScheme.primary,
+                contentColor = colorScheme.onPrimary
+            ) {
+                bottomItems.forEach { item ->
+                    val backStack by tabsNav.currentBackStackEntryAsState()
+                    val currentRoute = backStack?.destination?.route
+
+                    NavigationBarItem(
+                        selected = currentRoute == item.route,
+                        onClick = {
+                            if (item.route == BottomItem.Home.route) {
+                                vm.refreshHome()
+                                tabsNav.navigate(BottomItem.Home.route) {
+                                    popUpTo(tabsNav.graph.startDestinationId) { saveState = false }
+                                    launchSingleTop = true
+                                    restoreState = false
+                                }
+                            } else {
+                                tabsNav.navigate(item.route) {
+                                    popUpTo(tabsNav.graph.startDestinationId) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        },
+                        icon = {
+                            if ((item.badge ?: 0) > 0) {
+                                BadgedBox(badge = { Badge { Text("${item.badge}") } }) {
+                                    Icon(item.icon, contentDescription = item.title)
+                                }
+                            } else {
+                                Icon(item.icon, contentDescription = item.title)
+                            }
+                        },
+                        label = { Text(item.title) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = colorScheme.onPrimary,
+                            unselectedIconColor = colorScheme.onPrimary.copy(alpha = 0.7f),
+                            indicatorColor = colorScheme.secondaryContainer
+                        )
+                    )
+                }
+            }
+        },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { inner ->
         NavHost(
@@ -171,7 +227,6 @@ fun PrincipalScreen(
         ) {
             // HOME
             composable(route = BottomItem.Home.route) {
-                // Carga inicial en el primer ingreso
                 LaunchedEffect(Unit) {
                     if (productos.isEmpty()) vm.cargarProductos()
                 }
@@ -179,12 +234,20 @@ fun PrincipalScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(16.dp),
+                        .padding(16.dp)
+                        .background(colorScheme.background),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     val saludo = "Hola ${state.email ?: "usuario"}"
-                    Text(saludo, style = MaterialTheme.typography.headlineSmall)
-                    Text("Bienvenido a tu pantalla principal.")
+                    Text(
+                        saludo,
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = colorScheme.onBackground
+                    )
+                    Text(
+                        "Bienvenido a tu pantalla principal.",
+                        color = colorScheme.onBackground
+                    )
 
                     // Filtros por categoría
                     LazyRow(
@@ -196,7 +259,17 @@ fun PrincipalScreen(
                             FilterChip(
                                 selected = categoriaSel == cat,
                                 onClick = { vm.setCategoria(cat) },
-                                label = { Text(cat) }
+                                label = { Text(cat) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    containerColor = if (categoriaSel == cat)
+                                        colorScheme.secondary
+                                    else
+                                        colorScheme.surface,
+                                    labelColor = if (categoriaSel == cat)
+                                        colorScheme.onSecondary
+                                    else
+                                        colorScheme.onSurface
+                                )
                             )
                         }
                     }
@@ -218,9 +291,7 @@ fun PrincipalScreen(
                             ) {
                                 UiProductosCard(
                                     producto = producto,
-                                    onAgregar = {
-                                        // TODO: vm.agregarAlCarrito(producto.id)
-                                    }
+                                    onAgregar = { /* TODO */ }
                                 )
                             }
                         }
@@ -231,30 +302,16 @@ fun PrincipalScreen(
             // FAVORITOS
             composable(BottomItem.Favs.route) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Favoritos")
+                    Text("Favoritos", color = colorScheme.onBackground)
                 }
             }
 
             // CARRITO
             composable(BottomItem.Cart.route) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Carrito")
+                    Text("Carrito", color = colorScheme.onBackground)
                 }
             }
-
-            // AGENDA
-            composable(BottomItem.Agenda.route) {
-                val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
-                if (uid == null) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Debes iniciar sesión para ver tus recordatorios.")
-                    }
-                } else {
-                    val context = androidx.compose.ui.platform.LocalContext.current
-                    val factory = remember(uid) { com.example.prueba.ui.vmfactory.RecordatorioVMFactory(context, uid) }
-                    val rvm: com.example.prueba.ui.recordatorio.RecordatorioViewModel =
-                        androidx.lifecycle.viewmodel.compose.viewModel(factory = factory)
-                    com.example.prueba.ui.recordatorio.RecordatorioScreen(rvm)
 
             // MÁS
             composable(BottomItem.More.route) {
@@ -265,8 +322,14 @@ fun PrincipalScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
                 ) {
-                    Text("Más opciones")
-                    Button(onClick = { vm.logout() }) {
+                    Text("Más opciones", color = colorScheme.onBackground)
+                    Button(
+                        onClick = { vm.logout() },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = colorScheme.secondary,
+                            contentColor = colorScheme.onSecondary
+                        )
+                    ) {
                         Icon(Icons.Outlined.Close, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
                         Text(if (state.loading) "Cerrando..." else "Cerrar sesión")
@@ -285,5 +348,10 @@ fun PrincipalScreen(
         }
     }
 }
+@Preview
+@Composable
+fun PreviewPrincipalScreen() {
+    PruebaTheme {
+        PrincipalScreen()
     }
 }

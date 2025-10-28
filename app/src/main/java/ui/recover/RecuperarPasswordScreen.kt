@@ -17,6 +17,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ui.recover.RecuperarViewModel
 import com.example.prueba.R
+import ui.home.components.AnimatedLogo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,13 +74,11 @@ fun RecuperarPasswordScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                Image(
-                    painter = painterResource(id = R.drawable.logo), //carga el drawable logo
-                    contentDescription = "Logo App",
+                AnimatedLogo(
                     modifier = Modifier
-                        .fillMaxWidth() //todo el ancho
-                        .height(150.dp), //y 150dp de alto
-                    contentScale = ContentScale.Fit //ajusta la imagen sin recortarla para que quepa
+                        .fillMaxWidth()
+                        .height(150.dp),
+                    // playing = ui.desdeVM, si tienes VM; por ahora puede quedar por defecto
                 )
                 Text(
                     text = "Introduzca su correo",

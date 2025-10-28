@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.example.prueba.R
 import ui.home.components.AnimatedLogo
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -22,7 +23,7 @@ fun HomeScreen(
     onRecoverClick: () -> Unit,
 ) {
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Mi App Kotlin") }) }
+        topBar = { TopAppBar(title = { Text("Inicio") }) }
     ) { inner ->
         HomeContent(
             modifier = Modifier
@@ -45,22 +46,13 @@ private fun HomeContent(
 ) {
     Column(
         modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
+        verticalArrangement = Arrangement.spacedBy(25.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        /*Image(
-            painter = painterResource(id = R.drawable.logo),
-            contentDescription = "Logo App",
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(150.dp),
-            contentScale = ContentScale.Fit
-        )*/
         AnimatedLogo(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(150.dp),
-            // playing = ui.desdeVM, si tienes VM; por ahora puede quedar por defecto
         )
         Text("¡Bienvenido!")
         Button(onClick = onLoginClick) { Text("Login") }
