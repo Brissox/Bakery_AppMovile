@@ -1,12 +1,11 @@
 package com.example.prueba.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 
+// Colores para modo claro
 private val LightColorScheme = lightColorScheme(
     primary = BrownPrimary,
     onPrimary = Color.White,
@@ -18,26 +17,26 @@ private val LightColorScheme = lightColorScheme(
     onSurface = TextPrimary
 )
 
+//COLOR MODO OSCURO
 private val DarkColorScheme = darkColorScheme(
-    primary = BrownDark,
-    onPrimary = Color.White,
-    secondary = PeachAccent,
-    onSecondary = Color.White,
-    background = Color(0xFF2B1D17), // marrón oscuro
-    onBackground = Color(0xFFFFF5E1),
-    surface = Color(0xFF3E2723),
-    onSurface = Color(0xFFFFEFD5)
+    primary = Color.White,          // color de botones y elementos primarios
+    onPrimary = Color.Black,        // texto sobre botones (si quieres)
+    secondary = Color.White,        // acentos (pueden ser botones secundarios)
+    onSecondary = Color.Black,      // texto sobre acentos
+    background = Color.Black,       // fondo negro
+    onBackground = Color.White,     // texto principal blanco
+    surface = Color.Black,          // tarjetas y recuadros negros
+    onSurface = Color.White,        // texto sobre tarjetas
+    error = Color(0xFFFF5555),     // rojo brillante para errores
+    onError = Color.White,          // texto sobre errores
+    outline = Color.White           // bordes blancos
 )
-
 @Composable
 fun PruebaTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,
@@ -45,4 +44,3 @@ fun PruebaTheme(
         content = content
     )
 }
-

@@ -15,7 +15,6 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -27,13 +26,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import com.example.prueba.ui.principal.components.UiProductosCard
 import com.example.prueba.ui.profile.ProfileScreen
 import com.example.prueba.ui.profile.ProfileViewModel
 import com.example.prueba.repository.auth.FirebaseAuthDataSource
 import com.example.prueba.data.media.MediaRepository
 import com.example.prueba.vmfactory.ProfileVMFactory
+import androidx.navigation.NavController
 
 // --- Bottom items ---
 sealed class BottomItem(
@@ -45,7 +44,6 @@ sealed class BottomItem(
     data object Home : BottomItem("home", "Inicio", Icons.Outlined.Home)
     data object Favs : BottomItem("favs", "Favoritos", Icons.Outlined.FavoriteBorder)
     data object Cart : BottomItem("cart", "Carrito", Icons.Outlined.ShoppingCart, badge = 3)
-
     data object Agenda : BottomItem("agenda", "Agenda", Icons.Outlined.PlayArrow)
     data object More : BottomItem("more", "Más", Icons.Outlined.Menu)
 }
@@ -68,7 +66,6 @@ private fun BottomBar(
                 selected = currentRoute == item.route,
                 onClick = {
                     if (item.route == BottomItem.Home.route) {
-                        // SIEMPRE refrescamos Home y NO restauramos estado
                         onHomeTap()
                         navController.navigate(BottomItem.Home.route) {
                             popUpTo(navController.graph.startDestinationId) { saveState = false }
@@ -76,7 +73,6 @@ private fun BottomBar(
                             restoreState = false
                         }
                     } else {
-                        // Resto de tabs con preservación de estado
                         navController.navigate(item.route) {
                             popUpTo(navController.graph.startDestinationId) { saveState = true }
                             launchSingleTop = true
@@ -103,26 +99,11 @@ private fun BottomBar(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PrincipalScreen(
-    onLogout: () -> Unit = {},
-    vm: PrincipalViewModel = viewModel()
+    vm: PrincipalViewModel,
+    tabsNav: NavHostController,
+    onLogout: () -> Unit
 ) {
-    val state by vm.ui.collectAsState()
-    val categoriaSel by vm.categoriaSel.collectAsState()
-    val productos by vm.productosFiltrados.collectAsState()
-
     var expanded by remember { mutableStateOf(false) }
-    val tabsNav = rememberNavController()
-
-    // Logout reactivo
-    LaunchedEffect(state.loggedOut) {
-        if (state.loggedOut) onLogout()
-    }
-
-    // Snackbar para errores
-    val snackbarHostState = remember { SnackbarHostState() }
-    LaunchedEffect(state.error) {
-        state.error?.let { snackbarHostState.showSnackbar(it) }
-    }
 
     Scaffold(
         topBar = {
@@ -138,30 +119,18 @@ fun PrincipalScreen(
                     ) {
                         DropdownMenuItem(
                             text = { Text("Perfil") },
-                            onClick = {
-                                expanded = false
-                                tabsNav.navigate("profile")
-                            },
+                            onClick = { expanded = false; tabsNav.navigate("profile") },
                             leadingIcon = { Icon(Icons.Outlined.Info, contentDescription = null) }
                         )
                         DropdownMenuItem(
-                            text = { Text("Configuración") },
-                            onClick = { expanded = false },
-                            leadingIcon = { Icon(Icons.Outlined.Settings, contentDescription = null) }
-                        )
-                        DropdownMenuItem(
                             text = { Text("Logout") },
-                            onClick = {
-                                expanded = false
-                                vm.logout()
-                            }
+                            onClick = { expanded = false; onLogout() }
                         )
                     }
                 }
             )
         },
-        bottomBar = { BottomBar(tabsNav, onHomeTap = { vm.refreshHome() }) },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        bottomBar = { BottomBar(tabsNav, onHomeTap = { vm.refreshHome() }) }
     ) { inner ->
         NavHost(
             navController = tabsNav,
@@ -170,61 +139,7 @@ fun PrincipalScreen(
         ) {
             // HOME
             composable(route = BottomItem.Home.route) {
-                // Carga inicial en el primer ingreso
-                LaunchedEffect(Unit) {
-                    if (productos.isEmpty()) vm.cargarProductos()
-                }
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    val saludo = "Hola ${state.email ?: "usuario"}"
-                    Text(saludo, style = MaterialTheme.typography.headlineSmall)
-                    Text("Bienvenido a tu pantalla principal.")
-
-                    // Filtros por categoría
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(vertical = 4.dp)
-                    ) {
-                        items(vm.categorias.size) { idx ->
-                            val cat = vm.categorias[idx]
-                            FilterChip(
-                                selected = categoriaSel == cat,
-                                onClick = { vm.setCategoria(cat) },
-                                label = { Text(cat) }
-                            )
-                        }
-                    }
-
-                    // Grilla de productos
-                    LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = 180.dp),
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        contentPadding = PaddingValues(top = 8.dp, bottom = 80.dp)
-                    ) {
-                        items(productos, key = { it.id }) { producto ->
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(0.6f)
-                                    .animateContentSize()
-                            ) {
-                                UiProductosCard(
-                                    producto = producto,
-                                    onAgregar = {
-                                        // TODO: vm.agregarAlCarrito(producto.id)
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
+                // TODO: carga inicial productos
             }
 
             // FAVORITOS
@@ -243,17 +158,8 @@ fun PrincipalScreen(
 
             // AGENDA
             composable(BottomItem.Agenda.route) {
-                val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
-                if (uid == null) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Debes iniciar sesión para ver tus recordatorios.")
-                    }
-                } else {
-                    val context = androidx.compose.ui.platform.LocalContext.current
-                    val factory = remember(uid) { com.example.prueba.ui.vmfactory.RecordatorioVMFactory(context, uid) }
-                    val rvm: com.example.prueba.ui.recordatorio.RecordatorioViewModel =
-                        androidx.lifecycle.viewmodel.compose.viewModel(factory = factory)
-                    com.example.prueba.ui.recordatorio.RecordatorioScreen(rvm)
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Agenda")
                 }
             }
 
@@ -270,7 +176,7 @@ fun PrincipalScreen(
                     Button(onClick = { vm.logout() }) {
                         Icon(Icons.Outlined.Close, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
-                        Text(if (state.loading) "Cerrando..." else "Cerrar sesión")
+                        Text("Cerrar sesión")
                     }
                 }
             }
