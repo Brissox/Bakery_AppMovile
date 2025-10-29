@@ -29,12 +29,22 @@ class CartViewModel : ViewModel() {
     }
 
     fun increaseQuantity(producto: Producto) {
-        _cartItems.find { it.producto.id == producto.id }?.let { it.cantidad++ }
+        val index = _cartItems.indexOfFirst { it.producto.id == producto.id }
+        if (index != -1) {
+            val item = _cartItems[index]
+            _cartItems[index] = item.copy(cantidad = item.cantidad + 1)
+        }
     }
 
     fun decreaseQuantity(producto: Producto) {
-        _cartItems.find { it.producto.id == producto.id }?.let {
-            if (it.cantidad > 1) it.cantidad-- else _cartItems.remove(it)
+        val index = _cartItems.indexOfFirst { it.producto.id == producto.id }
+        if (index != -1) {
+            val item = _cartItems[index]
+            if (item.cantidad > 1) {
+                _cartItems[index] = item.copy(cantidad = item.cantidad - 1)
+            } else {
+                _cartItems.removeAt(index)
+            }
         }
     }
 
@@ -45,4 +55,6 @@ class CartViewModel : ViewModel() {
     fun calcularTotal(): Int {
         return _cartItems.sumOf { it.producto.precio.filter { it.isDigit() }.toInt() * it.cantidad }
     }
+
+
 }

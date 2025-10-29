@@ -8,19 +8,12 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -48,7 +41,6 @@ sealed class BottomItem(
     data object Home : BottomItem("home", "Inicio", Icons.Outlined.Home)
     data object Favs : BottomItem("favs", "Favoritos", Icons.Outlined.FavoriteBorder)
     data object Cart : BottomItem("cart", "Carrito", Icons.Outlined.ShoppingCart, badge = 3)
-
     data object Agenda : BottomItem("agenda", "Agenda", Icons.Outlined.PlayArrow)
     data object More : BottomItem("more", "Más", Icons.Outlined.Menu)
 }
@@ -60,6 +52,7 @@ private val bottomItems = listOf(
 @Composable
 private fun BottomBar(
     navController: NavHostController,
+    cartViewModel: CartViewModel,
     onHomeTap: () -> Unit
 ) {
     val backStack by navController.currentBackStackEntryAsState()
@@ -71,7 +64,6 @@ private fun BottomBar(
                 selected = currentRoute == item.route,
                 onClick = {
                     if (item.route == BottomItem.Home.route) {
-                        // SIEMPRE refrescamos Home y NO restauramos estado
                         onHomeTap()
                         navController.navigate(BottomItem.Home.route) {
                             popUpTo(navController.graph.startDestinationId) { saveState = false }
@@ -79,7 +71,6 @@ private fun BottomBar(
                             restoreState = false
                         }
                     } else {
-                        // Resto de tabs con preservación de estado
                         navController.navigate(item.route) {
                             popUpTo(navController.graph.startDestinationId) { saveState = true }
                             launchSingleTop = true
@@ -88,8 +79,13 @@ private fun BottomBar(
                     }
                 },
                 icon = {
-                    if ((item.badge ?: 0) > 0) {
-                        BadgedBox(badge = { Badge { Text("${item.badge}") } }) {
+                    if (item == BottomItem.Cart) {
+                        val totalItems = cartViewModel.cartItems.sumOf { it.cantidad }
+                        BadgedBox(
+                            badge = {
+                                if (totalItems > 0) Badge { Text("$totalItems") }
+                            }
+                        ) {
                             Icon(item.icon, contentDescription = item.title)
                         }
                     } else {
@@ -102,7 +98,6 @@ private fun BottomBar(
         }
     }
 }
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PrincipalScreen(
@@ -118,12 +113,10 @@ fun PrincipalScreen(
     val cartViewModel: CartViewModel = viewModel()
     val favoritosViewModel: FavoritosViewModel = viewModel()
 
-    // Logout reactivo
     LaunchedEffect(state.loggedOut) {
         if (state.loggedOut) onLogout()
     }
 
-    // Snackbar para errores
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(state.error) {
         state.error?.let { snackbarHostState.showSnackbar(it) }
@@ -165,7 +158,13 @@ fun PrincipalScreen(
                 }
             )
         },
-        bottomBar = { BottomBar(tabsNav, onHomeTap = { vm.refreshHome() }) },
+        bottomBar = {
+            BottomBar(
+                navController = tabsNav,
+                cartViewModel = cartViewModel, // PASAMOS EL VIEWMODEL
+                onHomeTap = { vm.refreshHome() }
+            )
+        },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { inner ->
         NavHost(
@@ -175,7 +174,6 @@ fun PrincipalScreen(
         ) {
             // HOME
             composable(route = BottomItem.Home.route) {
-                // Carga inicial en el primer ingreso
                 LaunchedEffect(Unit) {
                     if (productos.isEmpty()) vm.cargarProductos()
                 }
@@ -190,7 +188,6 @@ fun PrincipalScreen(
                     Text(saludo, style = MaterialTheme.typography.headlineSmall)
                     Text("Bienvenido a tu pantalla principal.")
 
-                    // Filtros por categoría
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         contentPadding = PaddingValues(vertical = 4.dp)
@@ -205,7 +202,6 @@ fun PrincipalScreen(
                         }
                     }
 
-                    // Grilla de productos
                     LazyVerticalGrid(
                         columns = GridCells.Adaptive(minSize = 120.dp),
                         modifier = Modifier.fillMaxSize(),
@@ -222,8 +218,7 @@ fun PrincipalScreen(
                             ) {
                                 UiProductosCard(
                                     producto = producto,
-                                    onAgregar = {
-                                        cartViewModel.agregarProducto(producto) },
+                                    cartViewModel = cartViewModel,
                                     esFavorito = favoritosViewModel.esFavorito(producto),
                                     onFavoritoClick = { favoritosViewModel.toggleFavorito(producto) }
                                 )
@@ -242,32 +237,31 @@ fun PrincipalScreen(
                     }
                 } else {
                     LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
+                        columns = GridCells.Fixed(2), // 2 por fila
                         modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
-                        horizontalArrangement = Arrangement.spacedBy(2.dp),
-                        contentPadding = PaddingValues(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(16.dp)
                     ) {
-                        items(favoritos, key = { it.id }) { producto ->
+                        items(favoritos.take(2), key = { it.id }) { producto -> // solo los 2 primeros
                             UiProductosCard(
                                 producto = producto,
-                                onAgregar = { cartViewModel.agregarProducto(producto) },
+                                cartViewModel = cartViewModel,
                                 esFavorito = true,
-                                onFavoritoClick = { favoritosViewModel.toggleFavorito(producto) }
+                                onFavoritoClick = { favoritosViewModel.toggleFavorito(producto) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp) // imagen más grande
                             )
                         }
                     }
                 }
             }
 
-
-
             // CARRITO
             composable(BottomItem.Cart.route) {
-                // Instancia el ViewModel (vive mientras estés en la Activity)
                 CarritoScreen(cartViewModel = cartViewModel)
             }
-
 
             // AGENDA
             composable(BottomItem.Agenda.route) {

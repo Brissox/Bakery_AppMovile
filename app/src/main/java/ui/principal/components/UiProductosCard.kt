@@ -19,16 +19,22 @@ import androidx.compose.animation.core.tween
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextAlign
 import com.example.prueba.model.Producto
+import com.example.prueba.ui.carrito.CartViewModel
 
 @Composable
 fun UiProductosCard(
     producto: Producto,
-    onAgregar: (Producto) -> Unit,
+    cartViewModel: CartViewModel,
     esFavorito: Boolean,
-    onFavoritoClick: () -> Unit
+    onFavoritoClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    var agregado by remember { mutableStateOf(false) }
+    val cartItems = cartViewModel.cartItems
+    val itemEnCarrito = cartItems.find { it.producto.id == producto.id }
+    val cantidad = itemEnCarrito?.cantidad ?: 0
+    val agregado = cantidad > 0
 
     Card(
         modifier = Modifier
@@ -42,7 +48,7 @@ fun UiProductosCard(
                 .fillMaxSize()
                 .padding(12.dp)
         ) {
-            Box { // <-- Caja para superponer el botón de favorito sobre la imagen
+            Box {
                 Image(
                     painter = painterResource(producto.imagenes),
                     contentDescription = producto.titulo,
@@ -93,16 +99,13 @@ fun UiProductosCard(
 
             Spacer(Modifier.weight(1f))
 
-            // --- Animaciones del botón de agregar ---
             val interactionSource = remember { MutableInteractionSource() }
             val presionado by interactionSource.collectIsPressedAsState()
-
             val escala by animateFloatAsState(
                 targetValue = if (presionado) 0.95f else 1f,
                 animationSpec = tween(durationMillis = 100),
                 label = "scaleAnim"
             )
-
             val colorFondo by animateColorAsState(
                 targetValue = if (agregado)
                     MaterialTheme.colorScheme.secondary
@@ -113,10 +116,7 @@ fun UiProductosCard(
             )
 
             Button(
-                onClick = {
-                    agregado = !agregado
-                    onAgregar(producto)
-                },
+                onClick = { cartViewModel.agregarProducto(producto) },
                 interactionSource = interactionSource,
                 colors = ButtonDefaults.buttonColors(containerColor = colorFondo),
                 modifier = Modifier
@@ -125,8 +125,10 @@ fun UiProductosCard(
                     .animateContentSize()
             ) {
                 Text(
-                    if (agregado) "Agregado" else "Agregar al carrito",
-                    style = MaterialTheme.typography.labelLarge
+                    text = if (agregado) "Agregado" else "Agregar al carrito",
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
                 )
             }
         }
