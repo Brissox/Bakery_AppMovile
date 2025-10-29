@@ -8,18 +8,12 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -31,8 +25,10 @@ import com.example.prueba.ui.profile.ProfileScreen
 import com.example.prueba.ui.profile.ProfileViewModel
 import com.example.prueba.repository.auth.FirebaseAuthDataSource
 import com.example.prueba.data.media.MediaRepository
+import com.example.prueba.ui.carrito.CarritoScreen
+import com.example.prueba.ui.carrito.CartViewModel
 import com.example.prueba.vmfactory.ProfileVMFactory
-import androidx.navigation.NavController
+import ui.Fav.FavoritosViewModel
 
 // --- Bottom items ---
 sealed class BottomItem(
@@ -55,6 +51,7 @@ private val bottomItems = listOf(
 @Composable
 private fun BottomBar(
     navController: NavHostController,
+    cartViewModel: CartViewModel,
     onHomeTap: () -> Unit
 ) {
     val backStack by navController.currentBackStackEntryAsState()
@@ -81,8 +78,13 @@ private fun BottomBar(
                     }
                 },
                 icon = {
-                    if ((item.badge ?: 0) > 0) {
-                        BadgedBox(badge = { Badge { Text("${item.badge}") } }) {
+                    if (item == BottomItem.Cart) {
+                        val totalItems = cartViewModel.cartItems.sumOf { it.cantidad }
+                        BadgedBox(
+                            badge = {
+                                if (totalItems > 0) Badge { Text("$totalItems") }
+                            }
+                        ) {
                             Icon(item.icon, contentDescription = item.title)
                         }
                     } else {
@@ -95,7 +97,6 @@ private fun BottomBar(
         }
     }
 }
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PrincipalScreen(
@@ -104,6 +105,18 @@ fun PrincipalScreen(
     onLogout: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val tabsNav = rememberNavController()
+    val cartViewModel: CartViewModel = viewModel()
+    val favoritosViewModel: FavoritosViewModel = viewModel()
+
+    LaunchedEffect(state.loggedOut) {
+        if (state.loggedOut) onLogout()
+    }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(state.error) {
+        state.error?.let { snackbarHostState.showSnackbar(it) }
+    }
 
     Scaffold(
         topBar = {
@@ -130,7 +143,14 @@ fun PrincipalScreen(
                 }
             )
         },
-        bottomBar = { BottomBar(tabsNav, onHomeTap = { vm.refreshHome() }) }
+        bottomBar = {
+            BottomBar(
+                navController = tabsNav,
+                cartViewModel = cartViewModel, // PASAMOS EL VIEWMODEL
+                onHomeTap = { vm.refreshHome() }
+            )
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { inner ->
         NavHost(
             navController = tabsNav,
@@ -139,21 +159,93 @@ fun PrincipalScreen(
         ) {
             // HOME
             composable(route = BottomItem.Home.route) {
-                // TODO: carga inicial productos
+                LaunchedEffect(Unit) {
+                    if (productos.isEmpty()) vm.cargarProductos()
+                }
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    val saludo = "Hola ${state.email ?: "usuario"}"
+                    Text(saludo, style = MaterialTheme.typography.headlineSmall)
+                    Text("Bienvenido a tu pantalla principal.")
+
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(vertical = 4.dp)
+                    ) {
+                        items(vm.categorias.size) { idx ->
+                            val cat = vm.categorias[idx]
+                            FilterChip(
+                                selected = categoriaSel == cat,
+                                onClick = { vm.setCategoria(cat) },
+                                label = { Text(cat) }
+                            )
+                        }
+                    }
+
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(minSize = 120.dp),
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                        contentPadding = PaddingValues(top = 8.dp, bottom = 80.dp)
+                    ) {
+                        items(productos, key = { it.id }) { producto ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(0.6f)
+                                    .animateContentSize()
+                            ) {
+                                UiProductosCard(
+                                    producto = producto,
+                                    cartViewModel = cartViewModel,
+                                    esFavorito = favoritosViewModel.esFavorito(producto),
+                                    onFavoritoClick = { favoritosViewModel.toggleFavorito(producto) }
+                                )
+                            }
+                        }
+                    }
+                }
             }
 
             // FAVORITOS
             composable(BottomItem.Favs.route) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Favoritos")
+                val favoritos = favoritosViewModel.favoritos
+                if (favoritos.isEmpty()) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("No tienes productos favoritos aún.")
+                    }
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2), // 2 por fila
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(16.dp)
+                    ) {
+                        items(favoritos.take(2), key = { it.id }) { producto -> // solo los 2 primeros
+                            UiProductosCard(
+                                producto = producto,
+                                cartViewModel = cartViewModel,
+                                esFavorito = true,
+                                onFavoritoClick = { favoritosViewModel.toggleFavorito(producto) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp) // imagen más grande
+                            )
+                        }
+                    }
                 }
             }
 
             // CARRITO
             composable(BottomItem.Cart.route) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Carrito")
-                }
+                CarritoScreen(cartViewModel = cartViewModel)
             }
 
             // AGENDA

@@ -1,6 +1,7 @@
 package com.example.prueba.model
 import androidx.annotation.DrawableRes
 import com.example.prueba.R
+import com.example.prueba.model.Producto
 
 data class Producto(
     val id: Int,
@@ -14,8 +15,8 @@ data class Producto(
 val productosDemo = listOf(
     Producto(
         id = 1,
-        titulo = "Bombones de chocolate",
-        precio = "1.500 (1kg)",
+        titulo = "Bombones de chocolate (1kg)",
+        precio = "1.500 ",
         imagenes = R.drawable.cuadradachocolate,
         categoria = "Dulces",
         descripcion = "Aca se describe el producto"
@@ -38,8 +39,8 @@ val productosDemo = listOf(
     ),
     Producto(
         id = 4,
-        titulo = "Bombones de chocolate 2",
-        precio = "3.500 (1kg)",
+        titulo = "Bombones de chocolate 2 (1kg)",
+        precio = "3.500",
         imagenes = R.drawable.pansingluten,
         categoria = "Dulces",
         descripcion = "Aca se describe el producto"

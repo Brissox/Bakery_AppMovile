@@ -68,7 +68,7 @@ dependencies {
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material:material-icons-extended:1.7.2")
     implementation("io.coil-kt:coil-compose:2.6.0")
-
+    implementation("io.coil-kt:coil-compose:2.5.1")
 
 
     val room_version = "2.8.1"
