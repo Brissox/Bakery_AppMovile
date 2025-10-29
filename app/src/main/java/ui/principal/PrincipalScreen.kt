@@ -206,10 +206,10 @@ fun PrincipalScreen(
 
                     // Grilla de productos
                     LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = 180.dp),
+                        columns = GridCells.Adaptive(minSize = 120.dp),
                         modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
                         contentPadding = PaddingValues(top = 8.dp, bottom = 80.dp)
                     ) {
                         items(productos, key = { it.id }) { producto ->
