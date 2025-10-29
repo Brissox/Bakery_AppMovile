@@ -1,4 +1,4 @@
-package data
+package Data
 
 import com.example.prueba.model.Producto
 
