@@ -1,5 +1,9 @@
 package com.example.prueba.ui.recordatorio
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.prueba.model.Recordatorio
@@ -14,7 +18,8 @@ data class RecordatorioUiState(
     val items: List<Recordatorio> = emptyList(),
     val editingId: Long? = null,
     val mensaje: String = "",
-    val fechaCreacion: String = hoy(), // dd/MM/yyyy
+    val fechaCreacion: String = hoy(),
+    val alarmTimeTemp: Long? = null,// dd/MM/yyyy
     val loading: Boolean = false,
     val error: String? = null,
 ) {
@@ -73,13 +78,15 @@ class RecordatorioViewModel(
         viewModelScope.launch {
             _ui.update { it.copy(loading = true, error = null) }
             try {
+
                 if (s.editingId == null) {
                     // Create
                     repo.insert(
                         Recordatorio(
                             uid = uid,
                             createdAt = s.fechaCreacion,
-                            message = msg
+                            message = msg,
+                            alarmTime = s.alarmTimeTemp
                         )
                     )
                 } else {
@@ -89,7 +96,8 @@ class RecordatorioViewModel(
                             id = s.editingId,
                             uid = uid,
                             createdAt = s.fechaCreacion,
-                            message = msg
+                            message = msg,
+                            alarmTime = s.alarmTimeTemp
                         )
                     )
                 }
@@ -115,4 +123,22 @@ class RecordatorioViewModel(
             }
         }
     }
+
+    fun onAlarmDateChange(dateMillis: Long) = _ui.update { it.copy(alarmTimeTemp = dateMillis) }
+
+    fun onAlarmTimeChange(timeMillis: Long) = _ui.update {
+        val current = it.alarmTimeTemp ?: System.currentTimeMillis()
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = current
+            set(Calendar.HOUR_OF_DAY, Calendar.getInstance().apply { timeInMillis = timeMillis }.get(Calendar.HOUR_OF_DAY))
+            set(Calendar.MINUTE, Calendar.getInstance().apply { timeInMillis = timeMillis }.get(Calendar.MINUTE))
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        it.copy(alarmTimeTemp = calendar.timeInMillis)
+    }
+
+
+
+
 }
