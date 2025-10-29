@@ -1,4 +1,4 @@
-package cl.duoc.bakery_app
+package com.example.prueba
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize

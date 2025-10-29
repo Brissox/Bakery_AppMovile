@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.prueba.ui.home.HomeScreen
 import com.example.prueba.ui.theme.PruebaTheme
-import ui.app.AppNavHost
+import com.example.prueba.ui.app.AppNavHost
 
 
 

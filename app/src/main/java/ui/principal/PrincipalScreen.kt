@@ -35,8 +35,6 @@ import com.example.prueba.repository.auth.FirebaseAuthDataSource
 import com.example.prueba.data.media.MediaRepository
 import com.example.prueba.vmfactory.ProfileVMFactory
 
-
-
 // --- Bottom items ---
 sealed class BottomItem(
     val route: String,
@@ -47,6 +45,7 @@ sealed class BottomItem(
     data object Home : BottomItem("home", "Inicio", Icons.Outlined.Home)
     data object Favs : BottomItem("favs", "Favoritos", Icons.Outlined.FavoriteBorder)
     data object Cart : BottomItem("cart", "Carrito", Icons.Outlined.ShoppingCart, badge = 3)
+
     data object Agenda : BottomItem("agenda", "Agenda", Icons.Outlined.PlayArrow)
     data object More : BottomItem("more", "Más", Icons.Outlined.Menu)
 }
@@ -255,6 +254,8 @@ fun PrincipalScreen(
                     val rvm: com.example.prueba.ui.recordatorio.RecordatorioViewModel =
                         androidx.lifecycle.viewmodel.compose.viewModel(factory = factory)
                     com.example.prueba.ui.recordatorio.RecordatorioScreen(rvm)
+                }
+            }
 
             // MÁS
             composable(BottomItem.More.route) {
@@ -283,7 +284,5 @@ fun PrincipalScreen(
                 ProfileScreen(pvm)
             }
         }
-    }
-}
     }
 }
