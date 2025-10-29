@@ -1,16 +1,17 @@
-package cl.duoc.bakery_app
+package ui.app
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import cl.duoc.bakery_app.ui.app.Route
-import cl.duoc.bakery_app.ui.home.HomeScreen
-import cl.duoc.bakery_app.ui.login.LoginScreen
-import cl.duoc.bakery_app.ui.principal.PrincipalScreen
-import cl.duoc.bakery_app.ui.register.RegistrarseScreen
-import cl.duoc.bakery_app.ui.recover.RecuperarPasswordScreen
+import com.example.prueba.ui.home.HomeScreen
+import com.example.prueba.ui.login.LoginScreen
+import com.example.prueba.ui.principal.PrincipalScreen
+import com.example.prueba.ui.register.RegistrarseScreen
+import com.example.prueba.ui.recover.RecuperarPasswordScreen
+import ui.app.Route
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

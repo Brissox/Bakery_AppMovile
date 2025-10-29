@@ -1,4 +1,5 @@
-package cl.duoc.bakery_app.ui.home
+package com.example.prueba.ui.home
+
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -10,7 +11,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import cl.duoc.bakery_app.R
+import com.example.prueba.R
+import ui.home.components.AnimatedLogo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,13 +48,19 @@ private fun HomeContent(
         verticalArrangement = Arrangement.spacedBy(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.logopng),
+        /*Image(
+            painter = painterResource(id = R.drawable.logo),
             contentDescription = "Logo App",
             modifier = Modifier
                 .fillMaxWidth()
                 .height(150.dp),
             contentScale = ContentScale.Fit
+        )*/
+        AnimatedLogo(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(150.dp),
+            // playing = ui.desdeVM, si tienes VM; por ahora puede quedar por defecto
         )
         Text("¡Bienvenido!")
         Button(onClick = onLoginClick) { Text("Login") }

@@ -1,4 +1,4 @@
-package cl.duoc.bakery_app.ui.app
+package ui.app
 
 sealed class Route(val path: String) {
     data object HomeRoot : Route("homeRoot")
