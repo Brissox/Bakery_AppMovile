@@ -1,4 +1,4 @@
-package ui.app
+package com.example.prueba.ui.app
 
 sealed class Route(val path: String) {
     data object HomeRoot : Route("homeRoot")

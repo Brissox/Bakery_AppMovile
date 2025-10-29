@@ -1,4 +1,4 @@
-package ui.recover
+package com.example.prueba.ui.recover
 
 import android.util.Patterns
 import androidx.lifecycle.ViewModel

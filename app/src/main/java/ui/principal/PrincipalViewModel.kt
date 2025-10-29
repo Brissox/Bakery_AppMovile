@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import com.google.firebase.auth.FirebaseAuth
+
 
 data class PrincipalUiState(
     val email: String? = "usuario@demo.com",
@@ -32,6 +34,11 @@ class PrincipalViewModel : ViewModel() {
 
     private val _productosFiltrados = MutableStateFlow<List<Producto>>(emptyList())
     val productosFiltrados: StateFlow<List<Producto>> = _productosFiltrados.asStateFlow()
+
+    init {
+        val user = FirebaseAuth.getInstance().currentUser
+        _ui.value = _ui.value.copy(email = user?.email ?: "usuario desconocido")
+    }
 
     // ---------- Acciones ----------
     fun setCategoria(cat: String) {
