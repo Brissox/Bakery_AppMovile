@@ -1,22 +1,27 @@
 package com.example.prueba.ui.app
 
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.prueba.ui.home.HomeScreen
 import com.example.prueba.ui.login.LoginScreen
+import com.example.prueba.ui.login.LoginViewModel
 import com.example.prueba.ui.principal.PrincipalScreen
+import com.example.prueba.ui.principal.PrincipalViewModel
 import com.example.prueba.ui.register.RegistrarseScreen
 import com.example.prueba.ui.recover.RecuperarPasswordScreen
-import com.example.prueba.ui.app.Route
-
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavHost() {
-    val nav = rememberNavController()
+fun AppNavHost(
+    isDarkTheme: Boolean,
+    onToggleTheme: () -> Unit
+) {
+    val nav: NavHostController = rememberNavController()
 
     NavHost(navController = nav, startDestination = Route.HomeRoot.path) {
 
@@ -29,23 +34,25 @@ fun AppNavHost() {
         }
 
         composable(Route.Login.path) {
+            val loginVM: LoginViewModel = viewModel()
             LoginScreen(
+                nav = nav,
                 onBack = { nav.popBackStack() },
-                onLoginSuccess = {
-                    nav.navigate(Route.Principal.path) {
-                        // si quieres limpiar hacia atrás:
-                        // popUpTo(Route.HomeRoot.path) { inclusive = false }
-                        launchSingleTop = true
-                    }
-                }
+                onLoginSuccess = { nav.navigate(Route.Principal.path) },
+                vm = loginVM,
+                isDarkTheme = isDarkTheme,
+                onToggleTheme = onToggleTheme
             )
         }
 
         composable(Route.Principal.path) {
+            val principalVM: PrincipalViewModel = viewModel()
             PrincipalScreen(
+                vm = principalVM,
+                tabsNav = nav,
                 onLogout = {
                     nav.navigate(Route.HomeRoot.path) {
-                        popUpTo(Route.HomeRoot.path) { inclusive = true } // limpia back stack
+                        popUpTo(Route.HomeRoot.path) { inclusive = true }
                         launchSingleTop = true
                     }
                 }
@@ -55,24 +62,14 @@ fun AppNavHost() {
         composable(Route.Register.path) {
             RegistrarseScreen(
                 onBack = { nav.popBackStack() },
-                onRegistered = {
-                    nav.navigate(Route.Login.path) {
-                        popUpTo(Route.HomeRoot.path) { inclusive = false }
-                        launchSingleTop = true
-                    }
-                }
+                onRegistered = { nav.navigate(Route.Login.path) }
             )
         }
 
         composable(Route.RecoverPassword.path) {
             RecuperarPasswordScreen(
                 onBack = { nav.popBackStack() },
-                onSent = {
-                    nav.navigate(Route.Login.path) {
-                        popUpTo(Route.HomeRoot.path) { inclusive = false }
-                        launchSingleTop = true
-                    }
-                }
+                onSent = { nav.navigate(Route.Login.path) }
             )
         }
     }

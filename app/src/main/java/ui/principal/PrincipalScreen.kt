@@ -20,7 +20,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import com.example.prueba.ui.principal.components.UiProductosCard
 import com.example.prueba.ui.profile.ProfileScreen
 import com.example.prueba.ui.profile.ProfileViewModel
@@ -101,13 +100,10 @@ private fun BottomBar(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PrincipalScreen(
-    onLogout: () -> Unit = {},
-    vm: PrincipalViewModel = viewModel()
+    vm: PrincipalViewModel,
+    tabsNav: NavHostController,
+    onLogout: () -> Unit
 ) {
-    val state by vm.ui.collectAsState()
-    val categoriaSel by vm.categoriaSel.collectAsState()
-    val productos by vm.productosFiltrados.collectAsState()
-
     var expanded by remember { mutableStateOf(false) }
     val tabsNav = rememberNavController()
     val cartViewModel: CartViewModel = viewModel()
@@ -136,23 +132,12 @@ fun PrincipalScreen(
                     ) {
                         DropdownMenuItem(
                             text = { Text("Perfil") },
-                            onClick = {
-                                expanded = false
-                                tabsNav.navigate("profile")
-                            },
+                            onClick = { expanded = false; tabsNav.navigate("profile") },
                             leadingIcon = { Icon(Icons.Outlined.Info, contentDescription = null) }
                         )
                         DropdownMenuItem(
-                            text = { Text("Configuración") },
-                            onClick = { expanded = false },
-                            leadingIcon = { Icon(Icons.Outlined.Settings, contentDescription = null) }
-                        )
-                        DropdownMenuItem(
                             text = { Text("Logout") },
-                            onClick = {
-                                expanded = false
-                                vm.logout()
-                            }
+                            onClick = { expanded = false; onLogout() }
                         )
                     }
                 }
@@ -265,17 +250,8 @@ fun PrincipalScreen(
 
             // AGENDA
             composable(BottomItem.Agenda.route) {
-                val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
-                if (uid == null) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Debes iniciar sesión para ver tus recordatorios.")
-                    }
-                } else {
-                    val context = androidx.compose.ui.platform.LocalContext.current
-                    val factory = remember(uid) { com.example.prueba.ui.vmfactory.RecordatorioVMFactory(context, uid) }
-                    val rvm: com.example.prueba.ui.recordatorio.RecordatorioViewModel =
-                        androidx.lifecycle.viewmodel.compose.viewModel(factory = factory)
-                    com.example.prueba.ui.recordatorio.RecordatorioScreen(rvm)
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Agenda")
                 }
             }
 
@@ -292,7 +268,7 @@ fun PrincipalScreen(
                     Button(onClick = { vm.logout() }) {
                         Icon(Icons.Outlined.Close, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
-                        Text(if (state.loading) "Cerrando..." else "Cerrar sesión")
+                        Text("Cerrar sesión")
                     }
                 }
             }
