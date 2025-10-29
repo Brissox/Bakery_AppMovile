@@ -16,12 +16,17 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.ui.Alignment
 import com.example.prueba.model.Producto
 
 @Composable
 fun UiProductosCard(
     producto: Producto,
-    onAgregar: (Producto) -> Unit
+    onAgregar: (Producto) -> Unit,
+    esFavorito: Boolean,
+    onFavoritoClick: () -> Unit
 ) {
     var agregado by remember { mutableStateOf(false) }
 
@@ -37,14 +42,33 @@ fun UiProductosCard(
                 .fillMaxSize()
                 .padding(12.dp)
         ) {
-            Image(
-                painter = painterResource(producto.imagenes),
-                contentDescription = producto.titulo,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp),
-                contentScale = ContentScale.Crop
-            )
+            Box { // <-- Caja para superponer el botón de favorito sobre la imagen
+                Image(
+                    painter = painterResource(producto.imagenes),
+                    contentDescription = producto.titulo,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp),
+                    contentScale = ContentScale.Crop
+                )
+
+                IconButton(
+                    onClick = onFavoritoClick,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(4.dp)
+                ) {
+                    Icon(
+                        imageVector = if (esFavorito)
+                            androidx.compose.material.icons.Icons.Filled.Favorite
+                        else
+                            androidx.compose.material.icons.Icons.Outlined.FavoriteBorder,
+                        contentDescription = "Favorito",
+                        tint = if (esFavorito) androidx.compose.ui.graphics.Color.Red
+                        else androidx.compose.ui.graphics.Color.Gray
+                    )
+                }
+            }
 
             Spacer(Modifier.height(8.dp))
 
@@ -69,7 +93,7 @@ fun UiProductosCard(
 
             Spacer(Modifier.weight(1f))
 
-            // --- Animaciones del botón ---
+            // --- Animaciones del botón de agregar ---
             val interactionSource = remember { MutableInteractionSource() }
             val presionado by interactionSource.collectIsPressedAsState()
 
@@ -97,11 +121,8 @@ fun UiProductosCard(
                 colors = ButtonDefaults.buttonColors(containerColor = colorFondo),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .graphicsLayer {
-                        scaleX = escala
-                        scaleY = escala
-                    }
-                    .animateContentSize() // suaviza el cambio de texto
+                    .graphicsLayer { scaleX = escala; scaleY = escala }
+                    .animateContentSize()
             ) {
                 Text(
                     if (agregado) "Agregado" else "Agregar al carrito",

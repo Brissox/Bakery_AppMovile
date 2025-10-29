@@ -54,7 +54,7 @@ private fun HomeContent(
         AnimatedLogo(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(300.dp),
+                .height(250.dp),
         )
         Spacer(modifier = Modifier.height(50.dp))
 

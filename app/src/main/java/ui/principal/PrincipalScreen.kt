@@ -36,6 +36,7 @@ import com.example.prueba.data.media.MediaRepository
 import com.example.prueba.ui.carrito.CarritoScreen
 import com.example.prueba.ui.carrito.CartViewModel
 import com.example.prueba.vmfactory.ProfileVMFactory
+import ui.Fav.FavoritosViewModel
 
 // --- Bottom items ---
 sealed class BottomItem(
@@ -115,6 +116,7 @@ fun PrincipalScreen(
     var expanded by remember { mutableStateOf(false) }
     val tabsNav = rememberNavController()
     val cartViewModel: CartViewModel = viewModel()
+    val favoritosViewModel: FavoritosViewModel = viewModel()
 
     // Logout reactivo
     LaunchedEffect(state.loggedOut) {
@@ -221,8 +223,9 @@ fun PrincipalScreen(
                                 UiProductosCard(
                                     producto = producto,
                                     onAgregar = {
-                                        cartViewModel.agregarProducto(producto)
-                                    }
+                                        cartViewModel.agregarProducto(producto) },
+                                    esFavorito = favoritosViewModel.esFavorito(producto),
+                                    onFavoritoClick = { favoritosViewModel.toggleFavorito(producto) }
                                 )
                             }
                         }
@@ -232,10 +235,32 @@ fun PrincipalScreen(
 
             // FAVORITOS
             composable(BottomItem.Favs.route) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Favoritos")
+                val favoritos = favoritosViewModel.favoritos
+                if (favoritos.isEmpty()) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("No tienes productos favoritos aún.")
+                    }
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                        contentPadding = PaddingValues(8.dp)
+                    ) {
+                        items(favoritos, key = { it.id }) { producto ->
+                            UiProductosCard(
+                                producto = producto,
+                                onAgregar = { cartViewModel.agregarProducto(producto) },
+                                esFavorito = true,
+                                onFavoritoClick = { favoritosViewModel.toggleFavorito(producto) }
+                            )
+                        }
+                    }
                 }
             }
+
+
 
             // CARRITO
             composable(BottomItem.Cart.route) {
