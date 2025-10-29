@@ -9,8 +9,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.prueba.R
 import com.example.prueba.ui.home.components.AnimatedLogo
 
@@ -23,7 +25,7 @@ fun HomeScreen(
     onRecoverClick: () -> Unit,
 ) {
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Inicio") }) }
+        topBar = { TopAppBar(title = { Text("Pasteleria Mil Sabores") }) }
     ) { inner ->
         HomeContent(
             modifier = Modifier
@@ -45,21 +47,37 @@ private fun HomeContent(
     onRecoverClick: () -> Unit
 ) {
     Column(
-        modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(25.dp),
+        modifier = modifier.fillMaxSize().padding(16.dp),
+        verticalArrangement =Arrangement.Bottom,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AnimatedLogo(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(150.dp),
+                .height(250.dp),
         )
-        Text("¡Bienvenido!")
-        Button(onClick = onLoginClick) { Text("Login") }
+        Spacer(modifier = Modifier.height(50.dp))
+
+        Text("¡Bienvenido!",  fontSize = 30.sp)
+
+        Spacer(modifier = Modifier.height(50.dp))
+
+        Button(onClick = onLoginClick) { Text("Login",
+            fontSize = 22.sp,
+            modifier = Modifier.size(width = 250.dp, height = 40.dp)
+                .wrapContentHeight()
+                .fillMaxWidth(),
+            textAlign = TextAlign.Center) }
+
+        Spacer(modifier = Modifier.height(50.dp))
+
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            TextButton(onClick = onRegisterClick) { Text("Registrarse") }
-            TextButton(onClick = onRecoverClick) { Text("Recuperar contraseña") }
+            TextButton(onClick = onRegisterClick) { Text("Registrarse", fontSize = 18.sp) }
+            TextButton(onClick = onRecoverClick) { Text("Recuperar contraseña", fontSize = 18.sp) }
         }
+        Spacer(modifier = Modifier.height(100.dp))
+
+        Text("B2C Copyright - 2025",  fontSize = 15.sp)
     }
 }
 
