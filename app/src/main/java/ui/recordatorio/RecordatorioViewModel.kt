@@ -45,6 +45,16 @@ class RecordatorioViewModel(
 
     fun onMensajeChange(v: String) = _ui.update { it.copy(mensaje = v) }
 
+    // NUEVO MÉTODO: Permite cambiar la fecha recibiendo milisegundos (desde un DatePicker)
+    fun onFechaChange(millis: Long) {
+        val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        // Ajuste para que la fecha elegida sea consistente con la zona horaria (opcional según tu DatePicker)
+        formatter.timeZone = TimeZone.getTimeZone("UTC") 
+        
+        val nuevaFecha = formatter.format(Date(millis))
+        _ui.update { it.copy(fechaCreacion = nuevaFecha) }
+    }
+
     fun onNuevo() = _ui.update {
         it.copy(
             editingId = null,

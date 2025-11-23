@@ -1,23 +1,32 @@
 package com.example.prueba
 
-
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.prueba.ui.home.HomeScreen
+import androidx.core.view.WindowCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.prueba.ui.app.AppNavHost
 import com.example.prueba.ui.theme.PruebaTheme
-import ui.app.AppNavHost
+import ui.ProductScreen
+import viewmodel.ProductoViewModel
+/*
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // Hace que la app ocupe toda la pantalla (detrás de la barra de estado)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
-
+        setContent {
+            PruebaTheme {
+                // Inicializamos el ViewModel y cargamos la pantalla de productos directamente
+                val productoViewModel: ProductoViewModel = viewModel()
+                ProductScreen(viewModel = productoViewModel)
+            }
+        }
+    }
+}*/
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -8,19 +8,13 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -36,8 +30,8 @@ import com.example.prueba.data.media.MediaRepository
 import com.example.prueba.ui.carrito.CarritoScreen
 import com.example.prueba.ui.carrito.CartViewModel
 import com.example.prueba.vmfactory.ProfileVMFactory
-
-
+import ui.Fav.FavoritosViewModel
+import ui.feriados.FeriadoViewModel
 
 // --- Bottom items ---
 sealed class BottomItem(
@@ -51,19 +45,25 @@ sealed class BottomItem(
     data object Cart : BottomItem("cart", "Carrito", Icons.Outlined.ShoppingCart, badge = 3)
     data object Agenda : BottomItem("agenda", "Agenda", Icons.Outlined.PlayArrow)
     data object More : BottomItem("more", "Más", Icons.Outlined.Menu)
+
+    data object Feriados : BottomItem("feriados", "Feriados", Icons.Outlined.Info)
 }
 
 private val bottomItems = listOf(
-    BottomItem.Home, BottomItem.Favs, BottomItem.Cart, BottomItem.Agenda, BottomItem.More
+    BottomItem.Home, BottomItem.Favs, BottomItem.Cart, BottomItem.Agenda,  BottomItem.Feriados , BottomItem.More
 )
 
 @Composable
 private fun BottomBar(
     navController: NavHostController,
+    cartViewModel: CartViewModel,
     onHomeTap: () -> Unit
 ) {
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
+    
+    // Calculamos el badge total
+    val totalItems = cartViewModel.cartItems.sumOf { it.cantidad }
 
     NavigationBar {
         bottomItems.forEach { item ->
@@ -71,7 +71,6 @@ private fun BottomBar(
                 selected = currentRoute == item.route,
                 onClick = {
                     if (item.route == BottomItem.Home.route) {
-                        // SIEMPRE refrescamos Home y NO restauramos estado
                         onHomeTap()
                         navController.navigate(BottomItem.Home.route) {
                             popUpTo(navController.graph.startDestinationId) { saveState = false }
@@ -79,7 +78,6 @@ private fun BottomBar(
                             restoreState = false
                         }
                     } else {
-                        // Resto de tabs con preservación de estado
                         navController.navigate(item.route) {
                             popUpTo(navController.graph.startDestinationId) { saveState = true }
                             launchSingleTop = true
@@ -88,8 +86,10 @@ private fun BottomBar(
                     }
                 },
                 icon = {
-                    if ((item.badge ?: 0) > 0) {
-                        BadgedBox(badge = { Badge { Text("${item.badge}") } }) {
+                    if (item == BottomItem.Cart && totalItems > 0) {
+                        BadgedBox(
+                            badge = { Badge { Text("$totalItems") } }
+                        ) {
                             Icon(item.icon, contentDescription = item.title)
                         }
                     } else {
@@ -112,17 +112,19 @@ fun PrincipalScreen(
     val state by vm.ui.collectAsState()
     val categoriaSel by vm.categoriaSel.collectAsState()
     val productos by vm.productosFiltrados.collectAsState()
+    val categorias by vm.categorias.collectAsState()
 
     var expanded by remember { mutableStateOf(false) }
     val tabsNav = rememberNavController()
+    
+    // ViewModels compartidos
     val cartViewModel: CartViewModel = viewModel()
+    val favoritosViewModel: FavoritosViewModel = viewModel()
 
-    // Logout reactivo
     LaunchedEffect(state.loggedOut) {
         if (state.loggedOut) onLogout()
     }
 
-    // Snackbar para errores
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(state.error) {
         state.error?.let { snackbarHostState.showSnackbar(it) }
@@ -164,7 +166,13 @@ fun PrincipalScreen(
                 }
             )
         },
-        bottomBar = { BottomBar(tabsNav, onHomeTap = { vm.refreshHome() }) },
+        bottomBar = {
+            BottomBar(
+                navController = tabsNav,
+                cartViewModel = cartViewModel, // Pasamos el VM real
+                onHomeTap = { vm.refreshHome() }
+            )
+        },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { inner ->
         NavHost(
@@ -174,7 +182,6 @@ fun PrincipalScreen(
         ) {
             // HOME
             composable(route = BottomItem.Home.route) {
-                // Carga inicial en el primer ingreso
                 LaunchedEffect(Unit) {
                     if (productos.isEmpty()) vm.cargarProductos()
                 }
@@ -185,17 +192,16 @@ fun PrincipalScreen(
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    val saludo = "Hola ${state.email ?: "usuario"}"
+                    val saludo = "Hola ${state.nombre}"
                     Text(saludo, style = MaterialTheme.typography.headlineSmall)
                     Text("Bienvenido a tu pantalla principal.")
 
-                    // Filtros por categoría
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         contentPadding = PaddingValues(vertical = 4.dp)
                     ) {
-                        items(vm.categorias.size) { idx ->
-                            val cat = vm.categorias[idx]
+                        items(categorias.size) { idx ->
+                            val cat = categorias[idx]
                             FilterChip(
                                 selected = categoriaSel == cat,
                                 onClick = { vm.setCategoria(cat) },
@@ -204,26 +210,34 @@ fun PrincipalScreen(
                         }
                     }
 
-                    // Grilla de productos
-                    LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = 120.dp),
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
-                        horizontalArrangement = Arrangement.spacedBy(2.dp),
-                        contentPadding = PaddingValues(top = 8.dp, bottom = 80.dp)
-                    ) {
-                        items(productos, key = { it.id }) { producto ->
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(0.6f)
-                                    .animateContentSize()
-                            ) {
+                    if (state.loading) {
+                        Box(Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator()
+                        }
+                    } else if (state.error != null) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("Error: ${state.error}", color = Color.Red, textAlign = TextAlign.Center)
+                        }
+                    } else if (productos.isEmpty()) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("No se encontraron productos.")
+                        }
+                    } else {
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = PaddingValues(top = 8.dp, bottom = 80.dp)
+                        ) {
+                            items(productos, key = { it.id_producto }) { producto ->
+                                // Reactivamos los parámetros aquí
                                 UiProductosCard(
                                     producto = producto,
-                                    onAgregar = {
-                                        cartViewModel.agregarProducto(producto)
-                                    }
+                                    cartViewModel = cartViewModel,
+                                    esFavorito = favoritosViewModel.esFavorito(producto),
+                                    onFavoritoClick = { favoritosViewModel.toggleFavorito(producto) },
+                                    modifier = Modifier.fillMaxWidth()
                                 )
                             }
                         }
@@ -231,21 +245,40 @@ fun PrincipalScreen(
                 }
             }
 
-            // FAVORITOS
+            // FAVORITOS (Ahora funcional)
             composable(BottomItem.Favs.route) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Favoritos")
+                val favoritos = favoritosViewModel.favoritos
+                if (favoritos.isEmpty()) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("No tienes productos favoritos aún.")
+                    }
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(16.dp)
+                    ) {
+                        items(favoritos, key = { it.id_producto }) { producto ->
+                            UiProductosCard(
+                                producto = producto,
+                                cartViewModel = cartViewModel,
+                                esFavorito = true,
+                                onFavoritoClick = { favoritosViewModel.toggleFavorito(producto) },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
                 }
             }
 
             // CARRITO
             composable(BottomItem.Cart.route) {
-                // Instancia el ViewModel (vive mientras estés en la Activity)
                 CarritoScreen(cartViewModel = cartViewModel)
             }
-
-
-            // AGENDA
+            
+            // ... (Agenda y Más quedan igual)
             composable(BottomItem.Agenda.route) {
                 val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
                 if (uid == null) {
@@ -258,13 +291,19 @@ fun PrincipalScreen(
                     val rvm: com.example.prueba.ui.recordatorio.RecordatorioViewModel =
                         androidx.lifecycle.viewmodel.compose.viewModel(factory = factory)
                     com.example.prueba.ui.recordatorio.RecordatorioScreen(rvm)
+                }
+            }
 
-            // MÁS
+            // FERIADOS
+            composable(BottomItem.Feriados.route) {
+                // ViewModel sin factory (tiene constructor por defecto usando el repo)
+                val fvm: FeriadoViewModel = viewModel()
+                ui.feriados.FeriadoScreen(viewModel = fvm)
+            }
+
             composable(BottomItem.More.route) {
                 Column(
-                    Modifier
-                        .fillMaxSize()
-                        .padding(24.dp),
+                    Modifier.fillMaxSize().padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
                 ) {
@@ -277,7 +316,6 @@ fun PrincipalScreen(
                 }
             }
 
-            // PERFIL
             composable("profile") {
                 val authDs = remember { FirebaseAuthDataSource() }
                 val mediaRepo = remember { MediaRepository() }
@@ -286,7 +324,5 @@ fun PrincipalScreen(
                 ProfileScreen(pvm)
             }
         }
-    }
-}
     }
 }
