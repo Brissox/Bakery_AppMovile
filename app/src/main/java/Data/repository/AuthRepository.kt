@@ -22,6 +22,6 @@ class AuthRepository(
 
     fun logout() = ds.signOut()
     //fun currentUser(): User? = ds.currentUser()?.let { User(it.uid, it.email) }
-    fun currentUser(): User? = ds.currentUser()?.let { User(it.uid, it.email, it.displayName) }
+    fun currentUser(): User? = ds.currentUser()?.let { User(it.uid, it.email) }
 
 }

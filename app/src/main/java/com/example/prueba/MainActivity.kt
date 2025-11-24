@@ -6,9 +6,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.prueba.ui.app.AppNavHost
+
 import com.example.prueba.ui.theme.PruebaTheme
 import ui.ProductScreen
+import ui.app.AppNavHost
 import viewmodel.ProductoViewModel
 /*
 class MainActivity : ComponentActivity() {

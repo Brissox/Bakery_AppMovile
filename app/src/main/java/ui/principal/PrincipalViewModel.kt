@@ -1,9 +1,11 @@
 package com.example.prueba.ui.principal
 
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import Data.model.Productos
 import Data.repository.ProductoRepository
+import Data.repository.UsuarioRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,6 +23,8 @@ data class PrincipalUiState(
 class PrincipalViewModel : ViewModel() {
 
     private val repository = ProductoRepository()
+    private val usuarioRepository = UsuarioRepository()
+
 
     // ---------- Estado general ----------
     private val _ui = MutableStateFlow(PrincipalUiState())
@@ -40,12 +44,17 @@ class PrincipalViewModel : ViewModel() {
 
     init {
         val user = FirebaseAuth.getInstance().currentUser
+        val uidFb = user?.uid
         val nombreMostrar = user?.displayName ?: "Usuario"
 
         _ui.value = _ui.value.copy(
             email = user?.email ?: "usuario desconocido",
             nombre = nombreMostrar
         )
+
+        if (uidFb != null) {
+            cargarDatosUsuario(uidFb) // <--- Nueva función para traer datos del usuario
+        }
         cargarProductos()
     }
 
@@ -79,6 +88,20 @@ class PrincipalViewModel : ViewModel() {
         }
     }
 
+
+
+    fun cargarDatosUsuario(uid: String) {
+        viewModelScope.launch {
+            try {
+                // Suponiendo que agregaste este método en tu repositorio como te expliqué antes
+                val respuesta = usuarioRepository.buscarPorFirebase(uid)
+                // Aquí manejas la respuesta (ej: guardar datos extra del usuario en _ui)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     /** Reset al tocar Inicio: categoría base + recarga. */
     fun refreshHome() {
         _categoriaSel.value = "Todos"
@@ -103,3 +126,4 @@ class PrincipalViewModel : ViewModel() {
         }
     }
 }
+

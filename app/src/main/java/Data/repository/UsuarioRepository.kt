@@ -27,14 +27,14 @@ class UsuarioRepository(
         return r.isSuccessful
     }
 
-    suspend fun subirImagen(rut: String, idFirebase: String, file: File): Boolean {
+    suspend fun subirImagen(run: String, idFirebase: String, file: File): Boolean {
         val idPart = idFirebase.toRequestBody("text/plain".toMediaTypeOrNull())
         val imgPart = MultipartBody.Part.createFormData(
             name = "imagen",
             filename = file.name,
             body = file.asRequestBody("image/*".toMediaTypeOrNull())
         )
-        val r = api.actualizarUsuarioConImagen(rut, idPart, imgPart)
+        val r = api.actualizarUsuarioConImagen(run, idPart, imgPart)
         if (!r.isSuccessful) throw HttpException(r)
         // si quieres, puedes leer el texto: r.body()?.string() == "Usuario actualizado"
         return true

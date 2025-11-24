@@ -317,7 +317,7 @@ fun PrincipalScreen(
             }
 
             composable("profile") {
-                val authDs = remember { FirebaseAuthDataSource() }
+                val authDs = remember { Data.repository.FirebaseAuthDataSource() }
                 val mediaRepo = remember { MediaRepository() }
                 val factory = remember { ProfileVMFactory(authDs, mediaRepo) }
                 val pvm: ProfileViewModel = viewModel(factory = factory)

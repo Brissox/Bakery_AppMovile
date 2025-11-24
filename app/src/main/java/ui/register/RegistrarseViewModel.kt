@@ -17,6 +17,7 @@ data class RegistrarseUiState(
     val dv: String = "",
     val usuario: String = "",
     val fechaNacimiento: String = "",
+    val nombre: String = "",
     val email: String = "",
     val password: String = "",
     val imagenFile: File? = null,
@@ -39,6 +40,8 @@ class RegistrarseViewModel(
     fun onDv(v: String) = _ui.update { it.copy(dv = v.take(1)) }
     fun onUsuario(v: String) = _ui.update { it.copy(usuario = v) }
 
+    fun onNombre(v: String) = _ui.update { it.copy(nombre = v) }
+
     fun onFechaNacimiento(v: String) = _ui.update { it.copy(fechaNacimiento = v) }
     fun onEmail(v: String) = _ui.update { it.copy(email = v) }
     fun onPass(v: String) = _ui.update { it.copy(password = v) }
@@ -56,13 +59,15 @@ class RegistrarseViewModel(
 
             // 2) Enviar datos al backend (Mapeo al DTO actualizado)
             val dto = UsuarioDto(
-                RUN = _ui.value.run.toIntOrNull() ?: 0,
+                // CORRECCIÓN: Usamos los nombres en MAYÚSCULAS del DTO
+                RUN = _ui.value.run,
                 DV = _ui.value.dv,
                 USUARIO = _ui.value.usuario,
                 CORREO = _ui.value.email,
                 CONTRASENA = _ui.value.password,
-                U_ID = uid, // Asegúrate de que tu UsuarioDto usa 'uidFb' o 'idfirebase' según corresponda
-                FECHA_NACIMIENTO = _ui.value.fechaNacimiento
+                U_ID = uid, 
+                FECHA_NACIMIENTO = _ui.value.fechaNacimiento,
+                NOMBRE = _ui.value.nombre
             )
             
             val ok = userRepo.crearUsuario(dto)
@@ -71,7 +76,7 @@ class RegistrarseViewModel(
             // 3) Subir imagen si existe
             _ui.value.imagenFile?.let { file ->
                 userRepo.subirImagen(
-                    rut = _ui.value.run, // El backend usa el RUN/RUT para identificar al usuario
+                    run = _ui.value.run,
                     idFirebase = uid,
                     file = file
                 )

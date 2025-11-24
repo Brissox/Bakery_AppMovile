@@ -23,6 +23,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import ui.register.RegistrarseViewModel
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -136,6 +137,15 @@ fun RegistrarseScreen(
                 singleLine = true
             )
 
+
+            OutlinedTextField(
+                value = ui.nombre,
+                onValueChange = vm::onNombre,
+                label = { Text("Nombre ") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+
             OutlinedTextField(
                 value = ui.fechaNacimiento, 
                 onValueChange = vm::onFechaNacimiento,
@@ -162,8 +172,6 @@ fun RegistrarseScreen(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
-
-            Divider()
 
             // Imagen: cámara / galería
             Text("Foto de perfil (Opcional)")
