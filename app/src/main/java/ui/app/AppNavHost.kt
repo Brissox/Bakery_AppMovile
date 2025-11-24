@@ -2,15 +2,18 @@ package ui.app
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.vector.path
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.prueba.ui.carrito.CarritoScreen
 import com.example.prueba.ui.home.HomeScreen
 import com.example.prueba.ui.login.LoginScreen
 import com.example.prueba.ui.principal.PrincipalScreen
 import com.example.prueba.ui.register.RegistrarseScreen
 import com.example.prueba.ui.recover.RecuperarPasswordScreen
 import ui.app.Route
+import ui.pago.PagoScreen
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,5 +78,19 @@ fun AppNavHost() {
                 }
             )
         }
+
+        composable(Route.pago.path) {
+            PagoScreen(
+                onSent = {
+                    nav.navigate(Route.pago.path) {
+                        popUpTo(Route.HomeRoot.path) { inclusive = false }
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+
+
+
     }
 }

@@ -107,6 +107,7 @@ private fun BottomBar(
 @Composable
 fun PrincipalScreen(
     onLogout: () -> Unit = {},
+    onCheckout: () -> Unit = {},
     vm: PrincipalViewModel = viewModel()
 ) {
     val state by vm.ui.collectAsState()
@@ -275,7 +276,8 @@ fun PrincipalScreen(
 
             // CARRITO
             composable(BottomItem.Cart.route) {
-                CarritoScreen(cartViewModel = cartViewModel)
+                CarritoScreen(cartViewModel = cartViewModel,
+                    onPagarClick = onCheckout )
             }
             
             // ... (Agenda y Más quedan igual)

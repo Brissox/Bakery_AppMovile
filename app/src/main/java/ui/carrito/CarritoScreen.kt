@@ -4,11 +4,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -17,11 +17,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.prueba.R // Asegúrate de importar tu R
-import com.example.prueba.ui.carrito.CartViewModel
+import androidx.navigation.NavController
+import com.example.prueba.R
+import ui.app.Route
 
 @Composable
-fun CarritoScreen(cartViewModel: CartViewModel = viewModel()) {
+fun CarritoScreen(
+    cartViewModel: CartViewModel = viewModel(),
+    navController: NavController // Recibimos el NavController
+) {
     val cartItems = cartViewModel.cartItems 
     val context = LocalContext.current
 
@@ -30,32 +34,19 @@ fun CarritoScreen(cartViewModel: CartViewModel = viewModel()) {
         Spacer(modifier = Modifier.height(12.dp))
 
         LazyColumn(modifier = Modifier.weight(1f)) {
-            // Usamos id_producto como key
             items(cartItems, key = { it.productos.id_producto }) { item ->
                 Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                     elevation = CardDefaults.cardElevation(4.dp)
                 ) {
                     Row(modifier = Modifier.padding(12.dp)) {
-                        
-                        // --- LÓGICA PARA MOSTRAR LA IMAGEN DESDE DRAWABLE ---
                         val imageResId = remember(item.productos.enlaceimg) {
                             val rawName = item.productos.enlaceimg ?: ""
-                            
-                            // Limpiamos el nombre igual que en la pantalla principal
-                            var nombre = rawName.substringAfterLast('/') // Quita /assets/...
-                            nombre = nombre.substringBeforeLast(".")     // Quita .jpg
-                            nombre = nombre.lowercase()
-                                           .replace(" ", "_")
-                                           .replace("-", "_")
+                            var nombre = rawName.substringAfterLast('/')
+                            nombre = nombre.substringBeforeLast(".")
+                            nombre = nombre.lowercase().replace(" ", "_").replace("-", "_")
 
-                            val id = context.resources.getIdentifier(
-                                nombre,
-                                "drawable",
-                                context.packageName
-                            )
+                            val id = context.resources.getIdentifier(nombre, "drawable", context.packageName)
                             if (id != 0) id else R.drawable.ic_launcher_foreground
                         }
 
@@ -63,14 +54,10 @@ fun CarritoScreen(cartViewModel: CartViewModel = viewModel()) {
                             painter = painterResource(id = imageResId),
                             contentDescription = item.productos.nombre,
                             contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(80.dp)
-                                .padding(end = 12.dp)
+                            modifier = Modifier.size(80.dp).padding(end = 12.dp)
                         )
-                        // ---------------------------------------------------
 
                         Column(modifier = Modifier.weight(1f)) {
-                            // Cambiamos .titulo por .nombre (tu modelo nuevo)
                             Text("Producto: ${item.productos.nombre}")
                             Text("Cantidad: ${item.cantidad}")
                             Text("Precio unitario: $${item.productos.precio}")
@@ -99,7 +86,16 @@ fun CarritoScreen(cartViewModel: CartViewModel = viewModel()) {
 
         Text("Total: $${cartViewModel.calcularTotal()}", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = { cartViewModel.clearCart() }, modifier = Modifier.fillMaxWidth()) {
+        
+        // Botón de Pagar que navega a la pantalla de pago
+        Button(
+            onClick = { navController.navigate(Route.Checkout.path) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Ir a Pagar")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedButton(onClick = { cartViewModel.clearCart() }, modifier = Modifier.fillMaxWidth()) {
             Text("Vaciar carrito")
         }
     }
