@@ -1,60 +1,97 @@
 package com.example.prueba.ui.register
 
-import android.util.Patterns
+import Data.Remote.dto.UsuarioDto
+import Data.repository.AuthRepository
+import Data.repository.UsuarioRepository
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.prueba.model.User
-import com.example.prueba.repository.auth.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 
-data class RegisterUiState(
+// UiState actualizado con los nuevos campos requeridos
+data class RegistrarseUiState(
+    val run: String = "", // Usamos String para la UI (Input), se convierte a Int al enviar
+    val dv: String = "",
+    val usuario: String = "",
+    val fechaNacimiento: String = "",
+    val nombre: String = "",
     val email: String = "",
     val password: String = "",
-    val confirm: String = "",
+    val imagenFile: File? = null,
     val loading: Boolean = false,
-    val error: String? = null,
-    val registered: Boolean = false,
-    val user: User? = null,
-    val message: String? = null
+    val ok: Boolean = false,
+    val msg: String? = null
 )
 
-class RegisterViewModel(
-    private val repo: AuthRepository = AuthRepository()
+class RegistrarseViewModel(
+    private val authRepo: AuthRepository = AuthRepository(),
+    private val userRepo: UsuarioRepository = UsuarioRepository()
 ) : ViewModel() {
 
-    private val _ui = MutableStateFlow(RegisterUiState())
-    val ui: StateFlow<RegisterUiState> = _ui
+    private val _ui = MutableStateFlow(RegistrarseUiState())
+    val ui: StateFlow<RegistrarseUiState> = _ui
 
-    fun onEmailChange(v: String)    = _ui.update { it.copy(email = v, error = null, message = null) }
-    fun onPasswordChange(v: String) = _ui.update { it.copy(password = v, error = null, message = null) }
-    fun onConfirmChange(v: String)  = _ui.update { it.copy(confirm = v, error = null, message = null) }
+    // Funciones para actualizar el estado desde la UI
+    fun onRun(v: String) = _ui.update { it.copy(run = v.filter { char -> char.isDigit() }) }
 
-    private fun validar(): String? {
-        val s = _ui.value
-        if (!Patterns.EMAIL_ADDRESS.matcher(s.email).matches()) return "Email inválido"
-        if (s.password.length < 6) return "La clave debe tener al menos 6 caracteres"
-        if (s.password != s.confirm) return "Las claves no coinciden"
-        return null
-    }
+    fun onDv(v: String) = _ui.update { it.copy(dv = v.take(1)) }
+    fun onUsuario(v: String) = _ui.update { it.copy(usuario = v) }
 
-    fun submit() {
-        val err = validar()
-        if (err != null) {
-            _ui.update { it.copy(error = err) }
-            return
-        }
-        viewModelScope.launch {
-            _ui.update { it.copy(loading = true, error = null, message = null) }
-            val user = repo.signUp(_ui.value.email, _ui.value.password)
+    fun onNombre(v: String) = _ui.update { it.copy(nombre = v) }
+
+    fun onFechaNacimiento(v: String) = _ui.update { it.copy(fechaNacimiento = v) }
+    fun onEmail(v: String) = _ui.update { it.copy(email = v) }
+    fun onPass(v: String) = _ui.update { it.copy(password = v) }
+    fun onImagenFile(f: File?) = _ui.update { it.copy(imagenFile = f) }
+    fun consumeMsg() = _ui.update { it.copy(msg = null) }
+
+    fun registrar() = viewModelScope.launch {
+        _ui.update { it.copy(loading = true, ok = false, msg = null) }
+
+        try {
+            // 1) Registrar usuario en Firebase Auth
+            val firebaseUser = authRepo.signUp(_ui.value.email, _ui.value.password)
+                ?: throw IllegalStateException("No se pudo registrar en Firebase")
+            val uid = firebaseUser.uid!!
+
+            // 2) Enviar datos al backend (Mapeo al DTO actualizado)
+            val dto = UsuarioDto(
+                // CORRECCIÓN: Usamos los nombres en MAYÚSCULAS del DTO
+                RUN = _ui.value.run,
+                DV = _ui.value.dv,
+                USUARIO = _ui.value.usuario,
+                CORREO = _ui.value.email,
+                CONTRASENA = _ui.value.password,
+                U_ID = uid, 
+                FECHA_NACIMIENTO = _ui.value.fechaNacimiento,
+                NOMBRE = _ui.value.nombre
+            )
+            
+            val ok = userRepo.crearUsuario(dto)
+            if (!ok) throw IllegalStateException("Fallo al guardar usuario en backend")
+
+            // 3) Subir imagen si existe
+            _ui.value.imagenFile?.let { file ->
+                userRepo.subirImagen(
+                    run = _ui.value.run,
+                    idFirebase = uid,
+                    file = file
+                )
+            }
+
+            _ui.update { it.copy(loading = false, ok = true, msg = "Registro exitoso") }
+
+        } catch (e: Exception) {
             _ui.update {
-                if (user != null) it.copy(loading = false, registered = true, user = user, message = "Cuenta creada. Inicia sesión.")
-                else it.copy(loading = false, error = "No se pudo crear la cuenta")
+                it.copy(
+                    loading = false,
+                    ok = false,
+                    msg = "Error al registrar: ${e.message}"
+                )
             }
         }
     }
-
-    fun messageConsumed() { _ui.update { it.copy(message = null) } }
 }

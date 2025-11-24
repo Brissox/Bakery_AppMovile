@@ -8,7 +8,7 @@ import com.example.prueba.repository.auth.FirebaseAuthDataSource
 import com.example.prueba.ui.profile.ProfileViewModel
 
 class ProfileVMFactory(
-    private val authDs: FirebaseAuthDataSource,
+    private val authDs: Data.repository.FirebaseAuthDataSource,
     private val mediaRepo: MediaRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

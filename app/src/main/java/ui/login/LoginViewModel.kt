@@ -33,7 +33,7 @@ class LoginViewModel(
 
     private fun validar(): String? {
         val s = _ui.value
-        if (!Patterns.EMAIL_ADDRESS.matcher(s.email).matches()) return "Email inválido"
+        if (!Patterns.EMAIL_ADDRESS.matcher(s.email).matches()) return "Error al iniciar sesion"
         if (s.password.length < 6) return "La clave debe tener al menos 6 caracteres"
         return null
     }

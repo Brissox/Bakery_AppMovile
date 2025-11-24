@@ -1,9 +1,9 @@
 package Data
 
-import com.example.prueba.model.Producto
+import Data.model.Productos
 
 
 data class CartItem(
-    val producto: Producto,
+    val producto: Productos,
     var cantidad: Int
 )
