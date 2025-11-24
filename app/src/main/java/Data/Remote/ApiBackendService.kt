@@ -10,14 +10,14 @@ import retrofit2.http.*
 
 interface ApiBackendService {
 
-    @POST("api/v1/Usuarios")
+    @POST("Usuarios/Reg")
     suspend fun crearUsuario(@Body body: UsuarioDto): Response<ResponseBody>
 
-    @GET("api/v1/Usuarios/uid/{uidFb}")
+    @GET("Usuarios/uid/{uidFb}")
     suspend fun getByFirebase(@Path("uidFb") uidFb: String): Response<UsuarioResp>
 
     @Multipart
-    @PUT("api/v1/Usuarios/{run}")
+    @PUT("Usuarios/{run}")
     suspend fun actualizarUsuarioConImagen(
         @Path("run") run: String,
         @Part("idFirebase") idFirebase: RequestBody,
@@ -26,10 +26,10 @@ interface ApiBackendService {
 
     // --- Corrección aquí ---
 
-    @GET("api/v1/Usuarios/{rut}/imagen")
+    @GET("Usuarios/{rut}/imagen")
     suspend fun getImageByRut(@Path("rut") rut: String): Response<ResponseBody>
 
-    @PUT("api/v1/Usuarios/{rut}/nombre")
+    @PUT("Usuarios/{rut}/nombre")
     suspend fun updateNombre(
         @Path("rut") rut: String,
         @Body body: Map<String, String>

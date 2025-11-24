@@ -1,9 +1,11 @@
 package Data.repository
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 class FirebaseAuthDataSource(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -16,11 +18,23 @@ class FirebaseAuthDataSource(
         }
 
 
+
     suspend fun signUp(email: String, pass: String): FirebaseUser? =
         suspendCancellableCoroutine { cont ->
             auth.createUserWithEmailAndPassword(email, pass)
                 .addOnSuccessListener { cont.resume(it.user) }
-                .addOnFailureListener { cont.resume(null) }
+                .addOnFailureListener { exception ->
+                    when (exception) {
+                        is FirebaseAuthUserCollisionException -> {
+                            // El email ya existe
+                            cont.resume(null) // o manejar como quieras
+                        }
+                        else -> {
+                            // Otro error
+                            cont.resumeWithException(exception)
+                        }
+                    }
+                }
         }
 
     suspend fun sendPasswordReset(email: String): Boolean =

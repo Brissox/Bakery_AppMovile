@@ -1,6 +1,7 @@
 package com.example.prueba.ui.profile
 
 import Data.Remote.dto.UsuarioResp
+import Data.model.usuario
 import Data.repository.FirebaseAuthDataSource
 import Data.repository.UsuarioRepository
 import android.content.Context
@@ -20,7 +21,11 @@ data class ProfileUiState(
     val uid: String? = null,
     val email: String? = null,
     val run: String = "",
+    val dv: String = "",
     val nombre: String? = null,
+    val correo: String? = null,
+    val usuario: String? = null,
+    val telefono: String? = null,
     val editingNombre: String = "",
     val imageBytes: ByteArray? = null,
     val lastSavedPhoto: Uri? = null,
@@ -59,7 +64,10 @@ class ProfileViewModel(
             _ui.update {
                 it.copy(
                     loading = false,
-                    run = resp.run,
+                    usuario = resp.usuario,
+                    correo = resp.correo,
+                    telefono = resp.telefono.toString(),
+                    run =  "${resp.run}-${resp.dv}",
                     nombre = resp.nombre,
                     editingNombre = resp.nombre,
                     imageBytes = bytes
@@ -115,8 +123,8 @@ class ProfileViewModel(
     }
 }
 
-
 /*
+
 import Data.Remote.dto.UsuarioResp
 import Data.repository.UsuarioRepository
 import android.net.Uri

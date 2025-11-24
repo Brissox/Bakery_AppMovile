@@ -48,5 +48,5 @@ object RetrofitClient {
         .client(okBackend)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
-}
 
+}

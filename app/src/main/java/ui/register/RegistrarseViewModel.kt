@@ -60,16 +60,16 @@ class RegistrarseViewModel(
             // 2) Enviar datos al backend (Mapeo al DTO actualizado)
             val dto = UsuarioDto(
                 // CORRECCIÓN: Usamos los nombres en MAYÚSCULAS del DTO
-                RUN = _ui.value.run,
-                DV = _ui.value.dv,
-                USUARIO = _ui.value.usuario,
-                CORREO = _ui.value.email,
-                CONTRASENA = _ui.value.password,
-                U_ID = uid, 
-                FECHA_NACIMIENTO = _ui.value.fechaNacimiento,
-                NOMBRE = _ui.value.nombre
+                run = _ui.value.run,
+                dv = _ui.value.dv,
+                usuario = _ui.value.usuario,
+                correo = _ui.value.email,
+                contrasena = _ui.value.password,
+                uidFb = uid,
+                fechaNacimiento = _ui.value.fechaNacimiento,
+                nombre = _ui.value.nombre
             )
-            
+
             val ok = userRepo.crearUsuario(dto)
             if (!ok) throw IllegalStateException("Fallo al guardar usuario en backend")
 

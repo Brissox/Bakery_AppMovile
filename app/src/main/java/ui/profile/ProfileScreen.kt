@@ -1,4 +1,5 @@
 package com.example.prueba.ui.profile
+
 import android.Manifest
 import android.os.Build
 import android.widget.Toast
@@ -77,9 +78,13 @@ fun ProfileScreen(vm: ProfileViewModel) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.Start
         ) {
+            Text("Usuario: ${ui.usuario ?: "No disponible"}")
             Text("Correo: ${ui.email ?: "No disponible"}")
             Text("UID: ${ui.uid ?: "No disponible"}")
-            Text("RUN: ${ui.run ?: "No disponible"}")
+            Text("RUT: ${ui.run ?: "No disponible"}")
+            Text("TELEFONO: ${ui.telefono ?: "No disponible"}")
+
+
 
             // Imagen desde backend (ByteArray)
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -224,7 +229,7 @@ fun ProfileScreen(vm: ProfileViewModel) {
             ) {
                 // FOTO DE PERFIL
                 // Prioridad: 1. Foto recién tomada, 2. Foto del backend, 3. Placeholder
-                val fotoMostrar = ui.lastSavedPhoto ?: ui.perfilBackend?.IMAGEN
+                val fotoMostrar = ui.lastSavedPhoto ?: ui.perfilBackend?.imagen
                 
                 Card(
                     modifier = Modifier.size(150.dp),
@@ -261,13 +266,13 @@ fun ProfileScreen(vm: ProfileViewModel) {
                 val perfil = ui.perfilBackend
                 
                 if (perfil != null) {
-                    ProfileItem("Usuario", perfil.USUARIO)
-                    ProfileItem("Nombre Completo", "${perfil.NOMBRE} ${perfil.APELLIDO_PATERNO}")
-                    ProfileItem("RUN", "${perfil.RUN}-${perfil.DV}")
-                    ProfileItem("Email", perfil.CORREO)
-                    ProfileItem("Fecha Nacimiento", perfil.FECHA_NACIMIENTO)
-                    ProfileItem("Ubicación", "${perfil.CIUDAD}, ${perfil.PAIS}")
-                    ProfileItem("Teléfono", perfil.TELEFONO.toString())
+                    ProfileItem("Usuario", perfil.usuario)
+                    ProfileItem("Nombre Completo", "${perfil.nombre} ${perfil.apellidoPaterno} ${perfil.apellidoMaterno}")
+                    ProfileItem("RUN", "${perfil.run}-${perfil.dv}")
+                    ProfileItem("Email", perfil.correo)
+                    ProfileItem("Fecha Nacimiento", perfil.fechaNacimiento)
+                    ProfileItem("Ubicación", "${perfil.ciudad}, ${perfil.pais}")
+                    ProfileItem("Teléfono", perfil.telefono.toString())
                 } else {
                     Text("No se pudieron cargar los datos del perfil.", color = MaterialTheme.colorScheme.error)
                 }

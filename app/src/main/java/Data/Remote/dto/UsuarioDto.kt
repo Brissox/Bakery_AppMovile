@@ -1,18 +1,26 @@
 package Data.Remote.dto
 
-
-// Modelo intermedio para enviar datos entre la app Android y tu backend
 data class UsuarioDto(
-    val RUN: String,
-    val DV: String,
-    val USUARIO: String,
-    val NOMBRE: String,
-    val CORREO: String,
-    val CONTRASENA: String,
-    val U_ID: String,
-    val FECHA_NACIMIENTO: String,
-    val Estado: String = "A",
-    val ID_ROL: Int = 2
-
+    val uidFb: String,
+    val nombre: String,
+    val apellidoPaterno: String = "",
+    val apellidoMaterno: String = "",
+    val usuario: String,
+    val correo: String,
+    val contrasena: String,
+    val telefono: Int = 0,
+    val fechaNacimiento: String,
+    val pais: String = "",
+    val ciudad: String = "",
+    val direccion: String = "",
+    val codigoDesc: String? = "",
+    val run: String,
+    val dv: String,
+    val estado: String = "A",
+    val imagen: String? = null,
+    val rol: RolDto = RolDto(2)
 )
 
+data class RolDto(
+    val idRol: Int = 2
+)
