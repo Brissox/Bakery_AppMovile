@@ -1,15 +1,16 @@
 package ui.Fav
 
 
+import Data.model.Productos
 import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.mutableStateListOf
-import com.example.prueba.model.Producto
+
 
 class FavoritosViewModel : ViewModel() {
-    private val _favoritos = mutableStateListOf<Producto>()
-    val favoritos: List<Producto> get() = _favoritos
+    private val _favoritos = mutableStateListOf<Productos>()
+    val favoritos: List<Productos> get() = _favoritos
 
-    fun toggleFavorito(producto: Producto) {
+    fun toggleFavorito(producto: Productos) {
         if (_favoritos.contains(producto)) {
             _favoritos.remove(producto)
         } else {
@@ -17,7 +18,7 @@ class FavoritosViewModel : ViewModel() {
         }
     }
 
-    fun esFavorito(producto: Producto): Boolean {
+    fun esFavorito(producto: Productos): Boolean {
         return _favoritos.contains(producto)
     }
 }
