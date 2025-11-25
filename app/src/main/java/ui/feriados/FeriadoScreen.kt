@@ -51,10 +51,9 @@ private fun ErrorBox(mensaje: String, onReintentar: () -> Unit) {
 private fun ListaFeriados(items: List<Feriado>) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp), // Aumenté un poco el padding general
+        contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // TÍTULO DE LA LISTA
         item {
             Text(
                 text = "Lista de feriados en Chile",
@@ -68,7 +67,6 @@ private fun ListaFeriados(items: List<Feriado>) {
             )
         }
 
-        // LISTA DE TARJETAS
         items(items) { f -> TarjetaFeriado(f) }
     }
 }

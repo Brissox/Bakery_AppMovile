@@ -36,21 +36,18 @@ class UsuarioRepository(
         )
         val r = api.actualizarUsuarioConImagen(run, idPart, imgPart)
         if (!r.isSuccessful) throw HttpException(r)
-        // si quieres, puedes leer el texto: r.body()?.string() == "Usuario actualizado"
         return true
     }
 
     suspend fun buscarPorFirebase(uid: String): UsuarioResp? =
         api.getByFirebase(uid).body()
 
-    // Actualizar nombre (requiere endpoint backend /{rut}/nombre)
     suspend fun actualizarNombre(rut: String, nuevoNombre: String): UsuarioResp? {
         val r = api.updateNombre(rut, mapOf("nombre" to nuevoNombre))
         if (!r.isSuccessful) throw HttpException(r)
         return r.body()
     }
 
-    // Cargar usuario por UID de Firebase
     suspend fun cargarPorFirebase(uid: String): UsuarioResp? {
         val r = api.getByFirebase(uid)
         if (!r.isSuccessful) throw HttpException(r)

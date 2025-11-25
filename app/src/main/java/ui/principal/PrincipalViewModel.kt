@@ -50,28 +50,23 @@ class PrincipalViewModel : ViewModel() {
         )
 
         if (uidFb != null) {
-            cargarDatosUsuario(uidFb) // <--- Nueva función para traer datos del usuario
+            cargarDatosUsuario(uidFb)
         }
         cargarProductos()
     }
 
-    // ---------- Acciones ----------
     fun setCategoria(cat: String) {
         _categoriaSel.value = cat
         aplicarFiltro()
     }
 
-    /** Carga/recarga la grilla (desde el Backend). */
     fun cargarProductos() {
         viewModelScope.launch {
             _ui.value = _ui.value.copy(loading = true, error = null)
             try {
-                // Llamada al repositorio real
                 val lista = repository.getProducto()
                 _fuente.value = lista
                 
-                // Actualizar categorías basadas en lo que llega
-                // Aseguramos que "Todos" siempre esté al principio
                 val cats = listOf("Todos") + lista.mapNotNull { it.categoria }.distinct()
                 _categorias.value = cats
 
@@ -108,7 +103,6 @@ class PrincipalViewModel : ViewModel() {
         }
     }
 
-    // ---------- Helper ----------
     private fun aplicarFiltro() {
         val cat = _categoriaSel.value
         val source = _fuente.value
@@ -119,4 +113,3 @@ class PrincipalViewModel : ViewModel() {
         }
     }
 }
-

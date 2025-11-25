@@ -1,24 +1,27 @@
 package ui.pago
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.example.prueba.ui.carrito.CartViewModel
+import com.example.prueba.ui.principal.BottomItem
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PagoScreen(
-    pagoViewModel: PagoViewModel = viewModel(),
-    onCompraExitosa: () -> Unit
+    navController: NavController,
+    cartViewModel: CartViewModel = viewModel()
 ) {
     var direccion by remember { mutableStateOf("") }
     var recibe by remember { mutableStateOf("") }
@@ -28,6 +31,7 @@ fun PagoScreen(
         LocalDate.now().plusDays(7)
             .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
     }
+
     var mostrarPopup by remember { mutableStateOf(false) }
 
     val opcionesPago = listOf(
@@ -38,159 +42,133 @@ fun PagoScreen(
     var expandedMetodoPago by remember { mutableStateOf(false) }
 
 
+    var pagoRealizado by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp)
-    ) {
+    val total = cartViewModel.cartItems.sumOf { it.productos.precio * it.cantidad }
 
-        Text("Resumen de compra", style = MaterialTheme.typography.headlineSmall)
-        Spacer(modifier = Modifier.height(12.dp))
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { padding ->
 
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp)
+        ) {
 
-        Text("Datos de despacho", style = MaterialTheme.typography.titleMedium)
-        Spacer(modifier = Modifier.height(8.dp))
+            Text("Pago", style = MaterialTheme.typography.headlineSmall)
+            Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = direccion,
-            onValueChange = { direccion = it },
-            label = { Text("Dirección de despacho") },
-            modifier = Modifier.fillMaxWidth()
-        )
+            Text("Datos de despacho", style = MaterialTheme.typography.titleMedium)
+            Spacer(modifier = Modifier.height(8.dp))
 
-        Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = direccion,
+                onValueChange = { direccion = it },
+                label = { Text("Dirección de despacho") },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        OutlinedTextField(
-            value = recibe,
-            onValueChange = { recibe = it },
-            label = { Text("Nombre de quien recibe") },
-            modifier = Modifier.fillMaxWidth()
-        )
+            Spacer(modifier = Modifier.height(8.dp))
 
-        Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = recibe,
+                onValueChange = { recibe = it },
+                label = { Text("Nombre de quien recibe") },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        OutlinedTextField(
-            value = contacto,
-            onValueChange = { contacto = it },
-            label = { Text("Número de contacto") },
-            // Corrección: Uso correcto de KeyboardOptions
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedTextField(
-            value = fechaEntrega,
-            onValueChange = {},
-            label = { Text("Fecha estimada de entrega") },
-            modifier = Modifier.fillMaxWidth(),
-            readOnly = true
-        )
+            OutlinedTextField(
+                value = contacto,
+                onValueChange = { contacto = it },
+                label = { Text("Número de contacto") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-        LazyColumn(modifier = Modifier.weight(1f)) {
-            items(pagoViewModel.cartItems) { item ->
-                Card(
+            ExposedDropdownMenuBox(
+                expanded = expandedMetodoPago,
+                onExpandedChange = { expandedMetodoPago = !expandedMetodoPago }
+            ) {
+
+                OutlinedTextField(
+                    value = metodoPago,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Metodo de Pago") },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedMetodoPago)
+                    },
                     modifier = Modifier
+                        .menuAnchor()
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    elevation = CardDefaults.cardElevation(4.dp)
+                )
+
+                ExposedDropdownMenu(
+                    expanded = expandedMetodoPago,
+                    onDismissRequest = { expandedMetodoPago = false }
                 ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        // Corrección: 'producto' en singular
-                        Text("Producto: ${item.productos.nombre}")
-                        Text("Cantidad: ${item.cantidad}")
-                        Text("Precio unitario: $${item.productos.precio}")
-                        // Corrección: Cálculo directo con el precio (Long)
-                        Text("Subtotal: $${item.productos.precio * item.cantidad}")
+                    opcionesPago.forEach { opcion ->
+                        DropdownMenuItem(
+                            text = { Text(opcion) },
+                            onClick = {
+                                metodoPago = opcion
+                                expandedMetodoPago = false
+                            }
+                        )
                     }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        ExposedDropdownMenuBox(
-            expanded = expandedMetodoPago,
-            onExpandedChange = { expandedMetodoPago = !expandedMetodoPago }
-        ) {
-
-            OutlinedTextField(
-                value = metodoPago,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Metodo de Pago") },
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedMetodoPago)
-                },
-                modifier = Modifier
-                    .menuAnchor()
-                    .fillMaxWidth()
+            Text(
+                "Total a pagar: $$total",
+                style = MaterialTheme.typography.headlineMedium
             )
 
-            ExposedDropdownMenu(
-                expanded = expandedMetodoPago,
-                onDismissRequest = { expandedMetodoPago = false }
-            ) {
-                opcionesPago.forEach { opcion ->
-                    DropdownMenuItem(
-                        text = { Text(opcion) },
-                        onClick = {
-                            metodoPago = opcion
-                            expandedMetodoPago = false
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = {
+                    pagoRealizado = true
+
+                    cartViewModel.clearCart()
+
+                    scope.launch {
+                        snackbarHostState.showSnackbar("Pago realizado con éxito 🎉")
+                    }
+
+                    scope.launch {
+                        kotlinx.coroutines.delay(1500)
+                        navController.navigate(BottomItem.Home.route) {
+                            popUpTo(ui.app.Route.Principal.path) { inclusive = true }
+                            launchSingleTop = true
                         }
-                    )
-                }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = direccion.isNotBlank() &&
+                        recibe.isNotBlank() &&
+                        contacto.isNotBlank()
+            ) {
+                Text("Pagar ahora")
+            }
+
+            if (pagoRealizado) {
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    "Procesando pago...",
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
-
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            "Total a pagar: $${pagoViewModel.total}",
-            style = MaterialTheme.typography.headlineMedium
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                pagoViewModel.realizarPago(
-                    direccion = direccion,
-                    recibe = recibe,
-                    contacto = contacto
-                )
-                mostrarPopup = true   // ← Abre popup
-            },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = direccion.isNotBlank() && recibe.isNotBlank() && contacto.isNotBlank()
-        ) {
-            Text("Pagar")
-        }
-        }
-    if (mostrarPopup) {
-        AlertDialog(
-            onDismissRequest = { mostrarPopup = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    mostrarPopup = false
-                    onCompraExitosa()   // ← Navegas o cierras pantalla
-                }) {
-                    Text("Aceptar")
-                }
-            },
-            title = { Text("Pago realizado") },
-            text = { Text("¡Tu pago ha sido procesado con éxito!") }
-        )
     }
-    }
-
-
-
-@Preview(showBackground = true)
-@Composable
-private fun PagoScreenPreview() {
-    PagoScreen(onCompraExitosa = {})
 }

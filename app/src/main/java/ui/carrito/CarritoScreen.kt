@@ -23,30 +23,49 @@ import ui.app.Route
 
 @Composable
 fun CarritoScreen(
-    cartViewModel: CartViewModel = viewModel(),
-    navController: NavController
+    navController: NavController,
+    cartViewModel: CartViewModel = viewModel()
 ) {
-    val cartItems = cartViewModel.cartItems 
+    val cartItems = cartViewModel.cartItems
     val context = LocalContext.current
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+
         Text("Carrito de compras", style = MaterialTheme.typography.headlineSmall)
         Spacer(modifier = Modifier.height(12.dp))
 
         LazyColumn(modifier = Modifier.weight(1f)) {
-            items(cartItems, key = { it.productos.id_producto }) { item ->
+
+            items(
+                items = cartItems,
+                key = { it.productos.id_producto }
+            ) { item ->
+
                 Card(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
                     elevation = CardDefaults.cardElevation(4.dp)
                 ) {
                     Row(modifier = Modifier.padding(12.dp)) {
+
                         val imageResId = remember(item.productos.enlaceimg) {
                             val rawName = item.productos.enlaceimg ?: ""
                             var nombre = rawName.substringAfterLast('/')
-                            nombre = nombre.substringBeforeLast(".")
-                            nombre = nombre.lowercase().replace(" ", "_").replace("-", "_")
+                                .substringBeforeLast(".")
+                                .lowercase()
+                                .replace(" ", "_")
+                                .replace("-", "_")
 
-                            val id = context.resources.getIdentifier(nombre, "drawable", context.packageName)
+                            val id = context.resources.getIdentifier(
+                                nombre,
+                                "drawable",
+                                context.packageName
+                            )
                             if (id != 0) id else R.drawable.ic_launcher_foreground
                         }
 
@@ -54,10 +73,13 @@ fun CarritoScreen(
                             painter = painterResource(id = imageResId),
                             contentDescription = item.productos.nombre,
                             contentScale = ContentScale.Crop,
-                            modifier = Modifier.size(80.dp).padding(end = 12.dp)
+                            modifier = Modifier
+                                .size(80.dp)
+                                .padding(end = 12.dp)
                         )
 
                         Column(modifier = Modifier.weight(1f)) {
+
                             Text("Producto: ${item.productos.nombre}")
                             Text("Cantidad: ${item.cantidad}")
                             Text("Precio unitario: $${item.productos.precio}")
@@ -66,13 +88,21 @@ fun CarritoScreen(
                                 modifier = Modifier.padding(top = 8.dp),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                IconButton(onClick = { cartViewModel.increaseQuantity(item.productos) }) {
+                                IconButton(onClick = {
+                                    cartViewModel.increaseQuantity(item.productos)
+                                }) {
                                     Icon(Icons.Default.Add, contentDescription = "Aumentar")
                                 }
-                                IconButton(onClick = { cartViewModel.decreaseQuantity(item.productos) }) {
+
+                                IconButton(onClick = {
+                                    cartViewModel.decreaseQuantity(item.productos)
+                                }) {
                                     Icon(Icons.Default.Remove, contentDescription = "Disminuir")
                                 }
-                                IconButton(onClick = { cartViewModel.eliminarProducto(item.productos) }) {
+
+                                IconButton(onClick = {
+                                    cartViewModel.eliminarProducto(item.productos)
+                                }) {
                                     Icon(Icons.Default.Delete, contentDescription = "Eliminar")
                                 }
                             }
@@ -82,20 +112,30 @@ fun CarritoScreen(
             }
         }
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        Divider(modifier = Modifier.padding(vertical = 8.dp))
 
-        Text("Total: $${cartViewModel.calcularTotal()}", style = MaterialTheme.typography.headlineMedium)
+        Text(
+            "Total: $${cartViewModel.calcularTotal()}",
+            style = MaterialTheme.typography.headlineMedium
+        )
+
         Spacer(modifier = Modifier.height(8.dp))
-        
-        // CORRECCIÓN: Usar la ruta 'pagar' que sí existe
+
         Button(
-            onClick = { navController.navigate(Route.pagar.path) },
+            onClick = {
+                navController.navigate(ui.app.Route.Pago.path)
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Ir a Pagar")
         }
+
         Spacer(modifier = Modifier.height(8.dp))
-        OutlinedButton(onClick = { cartViewModel.clearCart() }, modifier = Modifier.fillMaxWidth()) {
+
+        OutlinedButton(
+            onClick = { cartViewModel.clearCart() },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text("Vaciar carrito")
         }
     }

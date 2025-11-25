@@ -42,7 +42,6 @@ fun ProfileScreen(vm: ProfileViewModel) {
         ActivityResultContracts.RequestPermission()
     ) { granted -> hasRead = granted }
 
-    // Cámara: tomar foto y subir
     var pendingUri by remember { mutableStateOf<android.net.Uri?>(null) }
     val takePictureLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
@@ -57,7 +56,6 @@ fun ProfileScreen(vm: ProfileViewModel) {
         pendingUri = null
     }
 
-    // Galería: elegir imagen y subir
     val pickImage = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia()
     ) { uri ->
@@ -71,9 +69,9 @@ fun ProfileScreen(vm: ProfileViewModel) {
             Modifier
                 .padding(inner)
                 .fillMaxSize()
-                .verticalScroll(scroll)          // permite desplazar la pantalla
-                .imePadding()                    // evita que el teclado tape contenido
-                .navigationBarsPadding()         // respeta las barras del sistema
+                .verticalScroll(scroll)
+                .imePadding()
+                .navigationBarsPadding()
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.Start
@@ -86,28 +84,26 @@ fun ProfileScreen(vm: ProfileViewModel) {
 
 
 
-            // Imagen desde backend (ByteArray)
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 val bytes = ui.imageBytes
                 if (bytes != null && bytes.isNotEmpty()) {
                     val painter = rememberAsyncImagePainter(
                         ImageRequest.Builder(context)
-                            .data(bytes)     // Coil acepta ByteArray directo
-                            .size(512)       // objetivo razonable para evitar consumo excesivo
+                            .data(bytes)
+                            .size(512)
                             .crossfade(true)
                             .build()
                     )
                     Image(
                         painter = painter,
                         contentDescription = "Foto de perfil",
-                        modifier = Modifier.size(180.dp) // tamaño fijo que no empuja el layout
+                        modifier = Modifier.size(180.dp)
                     )
                 } else {
                     Text("Sin imagen")
                 }
             }
 
-            // Nombre (editable)
             OutlinedTextField(
                 value = ui.editingNombre,
                 onValueChange = vm::onNombreEdit,
@@ -122,7 +118,6 @@ fun ProfileScreen(vm: ProfileViewModel) {
                 modifier = Modifier.fillMaxWidth()
             ) { Text("Guardar nombre") }
 
-            // Botones para imagen
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
@@ -162,7 +157,7 @@ fun ProfileScreen(vm: ProfileViewModel) {
             }
             ui.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
-            Spacer(Modifier.height(24.dp)) // colchón para que se vea el final al hacer scroll
+            Spacer(Modifier.height(24.dp))
         }
     }
 }

@@ -130,14 +130,11 @@ private fun ReminderItem(
     onEdit: (Recordatorio) -> Unit,
     onDelete: (Recordatorio) -> Unit
 ) {
-    // Verificamos si la fecha es futura
     val esFuturo = isFutureDate(item.createdAt)
 
     ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-        // Usamos Box para poder posicionar el icono en la esquina superior derecha
         Box(modifier = Modifier.padding(12.dp)) {
             
-            // Ícono de campana en la esquina (solo si es futuro)
             if (esFuturo) {
                 Icon(
                     imageVector = Icons.Default.Notifications,
@@ -148,7 +145,6 @@ private fun ReminderItem(
             }
 
             Column {
-                // Dejamos espacio a la derecha del texto para que no choque con el icono si es muy largo
                 val paddingEnd = if (esFuturo) 24.dp else 0.dp
                 
                 Text(
@@ -176,13 +172,11 @@ private fun ReminderItem(
     }
 }
 
-// Función auxiliar para comparar fechas
 private fun isFutureDate(dateString: String): Boolean {
     return try {
         val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         val date = sdf.parse(dateString) ?: return false
         
-        // Obtenemos la fecha de hoy sin horas (00:00:00) para comparar solo días
         val hoy = Date()
         val hoyString = sdf.format(hoy)
         val hoyDate = sdf.parse(hoyString) ?: Date()

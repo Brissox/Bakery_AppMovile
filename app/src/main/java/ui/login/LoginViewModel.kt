@@ -18,7 +18,7 @@ data class LoginUiState(
     val error: String? = null,
     val loggedIn: Boolean = false,
     val user: User? = null,
-    val message: String? = null   // para Snackbar one-shot (opcional)
+    val message: String? = null
 )
 
 class LoginViewModel(

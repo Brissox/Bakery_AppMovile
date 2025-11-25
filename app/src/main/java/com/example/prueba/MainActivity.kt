@@ -11,23 +11,6 @@ import com.example.prueba.ui.theme.PruebaTheme
 import ui.ProductScreen
 import ui.app.AppNavHost
 import viewmodel.ProductoViewModel
-/*
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        
-        // Hace que la app ocupe toda la pantalla (detrás de la barra de estado)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-
-        setContent {
-            PruebaTheme {
-                // Inicializamos el ViewModel y cargamos la pantalla de productos directamente
-                val productoViewModel: ProductoViewModel = viewModel()
-                ProductScreen(viewModel = productoViewModel)
-            }
-        }
-    }
-}*/
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

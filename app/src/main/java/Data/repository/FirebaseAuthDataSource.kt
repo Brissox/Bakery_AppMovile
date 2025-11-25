@@ -26,11 +26,9 @@ class FirebaseAuthDataSource(
                 .addOnFailureListener { exception ->
                     when (exception) {
                         is FirebaseAuthUserCollisionException -> {
-                            // El email ya existe
-                            cont.resume(null) // o manejar como quieras
+                            cont.resume(null)
                         }
                         else -> {
-                            // Otro error
                             cont.resumeWithException(exception)
                         }
                     }

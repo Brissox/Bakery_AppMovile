@@ -1,7 +1,6 @@
 package Data.Remote.dto
 
 
-// Modelo de respuesta que representa lo que el backend devuelve al cliente
 data class UsuarioResp(
 
     val nombre: String,
@@ -20,7 +19,3 @@ data class UsuarioResp(
     val dv: String,
     val imagen: String
 )
-
-
-
-

@@ -1,5 +1,6 @@
 package com.example.prueba.ui.principal
 
+import Data.repository.UsuarioRepository
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
@@ -33,10 +34,10 @@ import com.example.prueba.ui.carrito.CartViewModel
 import com.example.prueba.vmfactory.ProfileVMFactory
 import ui.Fav.FavoritosViewModel
 import ui.feriados.FeriadoViewModel
+import ui.pago.PagoScreen
 import ui.pedido.PedidoScreen
 import java.security.Principal
 
-// --- Bottom items ---
 sealed class BottomItem(
     val route: String,
     val title: String,
@@ -68,7 +69,6 @@ private fun BottomBar(
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
 
-    // Calculamos el badge total
     val totalItems = cartViewModel.cartItems.sumOf { it.cantidad }
 
     NavigationBar {
@@ -124,7 +124,6 @@ fun PrincipalScreen(
     var expanded by remember { mutableStateOf(false) }
     val tabsNav = rememberNavController()
 
-    // ViewModels compartidos
     val cartViewModel: CartViewModel = viewModel()
     val favoritosViewModel: FavoritosViewModel = viewModel()
 
@@ -178,7 +177,7 @@ fun PrincipalScreen(
         bottomBar = {
             BottomBar(
                 navController = tabsNav,
-                cartViewModel = cartViewModel, // Pasamos el VM real
+                cartViewModel = cartViewModel,
                 onHomeTap = { vm.refreshHome() }
             )
         },
@@ -189,7 +188,6 @@ fun PrincipalScreen(
             startDestination = BottomItem.Home.route,
             modifier = Modifier.padding(inner)
         ) {
-            // HOME
             composable(route = BottomItem.Home.route) {
                 LaunchedEffect(Unit) {
                     if (productos.isEmpty()) vm.cargarProductos()
@@ -220,7 +218,10 @@ fun PrincipalScreen(
                     }
 
                     if (state.loading) {
-                        Box(Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
+                        Box(
+                            Modifier.fillMaxWidth().height(200.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
                             CircularProgressIndicator()
                         }
                     } else if (state.error != null) {
@@ -240,7 +241,6 @@ fun PrincipalScreen(
                             contentPadding = PaddingValues(top = 8.dp, bottom = 80.dp)
                         ) {
                             items(productos, key = { it.id_producto }) { producto ->
-                                // Reactivamos los parámetros aquí
                                 UiProductosCard(
                                     producto = producto,
                                     cartViewModel = cartViewModel,
@@ -254,7 +254,6 @@ fun PrincipalScreen(
                 }
             }
 
-            // FAVORITOS (Ahora funcional)
             composable(BottomItem.Favs.route) {
                 val favoritos = favoritosViewModel.favoritos
                 if (favoritos.isEmpty()) {
@@ -282,15 +281,13 @@ fun PrincipalScreen(
                 }
             }
 
-            // CARRITO
             composable(BottomItem.Cart.route) {
                 CarritoScreen(
                     cartViewModel = cartViewModel,
-                    navController = tabsNav // Solo pasamos el NavController
+                    navController = tabsNav
                 )
             }
 
-            // ... (Agenda y Más quedan igual)
             composable(BottomItem.Agenda.route) {
                 val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
                 if (uid == null) {
@@ -305,7 +302,6 @@ fun PrincipalScreen(
                     com.example.prueba.ui.recordatorio.RecordatorioScreen(rvm)
                 }
             }
-
 
             composable(BottomItem.pedido.route) {
                 PedidoScreen()
@@ -343,9 +339,18 @@ fun PrincipalScreen(
                 val pvm: ProfileViewModel = viewModel(factory = factory)
                 ProfileScreen(pvm)
             }
+
+            composable("pago") {
+                PagoScreen(
+                    navController = tabsNav,
+                    cartViewModel = cartViewModel
+                )
+            }
+        }
         }
     }
-}@Preview(showBackground = true)
+
+@Preview(showBackground = true)
 @Composable
 fun PrincipalScreenPreview() {
     PrincipalScreen()

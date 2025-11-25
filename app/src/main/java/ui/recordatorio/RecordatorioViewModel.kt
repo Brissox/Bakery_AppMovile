@@ -14,7 +14,7 @@ data class RecordatorioUiState(
     val items: List<Recordatorio> = emptyList(),
     val editingId: Long? = null,
     val mensaje: String = "",
-    val fechaCreacion: String = hoy(), // dd/MM/yyyy
+    val fechaCreacion: String = hoy(),  // dd/MM/yyyy
     val loading: Boolean = false,
     val error: String? = null,
 ) {
@@ -45,10 +45,8 @@ class RecordatorioViewModel(
 
     fun onMensajeChange(v: String) = _ui.update { it.copy(mensaje = v) }
 
-    // NUEVO MÉTODO: Permite cambiar la fecha recibiendo milisegundos (desde un DatePicker)
     fun onFechaChange(millis: Long) {
         val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-        // Ajuste para que la fecha elegida sea consistente con la zona horaria (opcional según tu DatePicker)
         formatter.timeZone = TimeZone.getTimeZone("UTC") 
         
         val nuevaFecha = formatter.format(Date(millis))
@@ -84,7 +82,6 @@ class RecordatorioViewModel(
             _ui.update { it.copy(loading = true, error = null) }
             try {
                 if (s.editingId == null) {
-                    // Create
                     repo.insert(
                         Recordatorio(
                             uid = uid,
@@ -93,7 +90,6 @@ class RecordatorioViewModel(
                         )
                     )
                 } else {
-                    // Update
                     repo.update(
                         Recordatorio(
                             id = s.editingId,
@@ -103,7 +99,7 @@ class RecordatorioViewModel(
                         )
                     )
                 }
-                onNuevo() // limpiar formulario
+                onNuevo()
             } catch (e: Exception) {
                 _ui.update { it.copy(error = e.message ?: "Error guardando") }
             } finally {
