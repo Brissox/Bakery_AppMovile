@@ -18,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.prueba.R
 import ui.app.Route
 
@@ -53,29 +54,15 @@ fun CarritoScreen(
                 ) {
                     Row(modifier = Modifier.padding(12.dp)) {
 
-                        val imageResId = remember(item.productos.enlaceimg) {
-                            val rawName = item.productos.enlaceimg ?: ""
-                            var nombre = rawName.substringAfterLast('/')
-                                .substringBeforeLast(".")
-                                .lowercase()
-                                .replace(" ", "_")
-                                .replace("-", "_")
-
-                            val id = context.resources.getIdentifier(
-                                nombre,
-                                "drawable",
-                                context.packageName
-                            )
-                            if (id != 0) id else R.drawable.ic_launcher_foreground
-                        }
-
-                        Image(
-                            painter = painterResource(id = imageResId),
+                        AsyncImage(
+                            model = item.productos.enlaceimg, // URL directa del backend
                             contentDescription = item.productos.nombre,
-                            contentScale = ContentScale.Crop,
                             modifier = Modifier
-                                .size(80.dp)
-                                .padding(end = 12.dp)
+                                .size(100.dp)
+                                .padding(end = 12.dp),
+                            contentScale = ContentScale.Crop,
+                            placeholder = painterResource(R.drawable.ic_launcher_foreground),
+                            error = painterResource(R.drawable.ic_launcher_foreground)
                         )
 
                         Column(modifier = Modifier.weight(1f)) {

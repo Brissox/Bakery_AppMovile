@@ -75,14 +75,12 @@ fun UiProductosCard(
                 .padding(12.dp)
         ) {
             Box(modifier = Modifier.fillMaxWidth().height(120.dp)) {
-                
-                // --- CAMBIO CLAVE: Usamos AsyncImage de Coil para cargar desde URL ---
+
                 AsyncImage(
-                    model = producto.enlaceimg, // La URL que viene del backend
+                    model = producto.enlaceimg,
                     contentDescription = producto.nombre,
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop, // Escala la imagen para llenar el espacio
-                    // Opcional: muestra una imagen de carga o de error
+                    contentScale = ContentScale.Crop,
                     placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
                     error = painterResource(id = R.drawable.ic_launcher_foreground)
                 )
