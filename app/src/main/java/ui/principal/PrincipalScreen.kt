@@ -141,7 +141,7 @@ fun PrincipalScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Principal") },
+                title = { Text("Mil Sabores") },
                 actions = {
                     IconButton(onClick = { expanded = true }) {
                         Icon(Icons.Outlined.MoreVert, contentDescription = "Menú")
