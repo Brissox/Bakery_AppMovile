@@ -11,9 +11,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
 
-// UiState actualizado con los nuevos campos requeridos
 data class RegistrarseUiState(
-    val run: String = "", // Usamos String para la UI (Input), se convierte a Int al enviar
+    val run: String = "",
     val dv: String = "",
     val usuario: String = "",
     val fechaNacimiento: String = "",
@@ -34,7 +33,6 @@ class RegistrarseViewModel(
     private val _ui = MutableStateFlow(RegistrarseUiState())
     val ui: StateFlow<RegistrarseUiState> = _ui
 
-    // Funciones para actualizar el estado desde la UI
     fun onRun(v: String) = _ui.update { it.copy(run = v.filter { char -> char.isDigit() }) }
 
     fun onDv(v: String) = _ui.update { it.copy(dv = v.take(1)) }
@@ -52,14 +50,11 @@ class RegistrarseViewModel(
         _ui.update { it.copy(loading = true, ok = false, msg = null) }
 
         try {
-            // 1) Registrar usuario en Firebase Auth
             val firebaseUser = authRepo.signUp(_ui.value.email, _ui.value.password)
                 ?: throw IllegalStateException("No se pudo registrar en Firebase")
             val uid = firebaseUser.uid!!
 
-            // 2) Enviar datos al backend (Mapeo al DTO actualizado)
             val dto = UsuarioDto(
-                // CORRECCIÓN: Usamos los nombres en MAYÚSCULAS del DTO
                 run = _ui.value.run,
                 dv = _ui.value.dv,
                 usuario = _ui.value.usuario,
@@ -73,7 +68,6 @@ class RegistrarseViewModel(
             val ok = userRepo.crearUsuario(dto)
             if (!ok) throw IllegalStateException("Fallo al guardar usuario en backend")
 
-            // 3) Subir imagen si existe
             _ui.value.imagenFile?.let { file ->
                 userRepo.subirImagen(
                     run = _ui.value.run,

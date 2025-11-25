@@ -36,12 +36,10 @@ fun RegistrarseScreen(
     val ui by vm.ui.collectAsState()
     val ctx = LocalContext.current
 
-    // ----- Galería -----
     val pickImage = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         if (uri != null) {
-            // Comprimir desde el Uri de galería
             val file = runCatching {
                 ImageCompressor.compressToTempFile(ctx, uri)
             }.getOrElse {
@@ -52,7 +50,6 @@ fun RegistrarseScreen(
         }
     }
 
-    // ----- Cámara -----
     var pendingUri by remember { mutableStateOf<Uri?>(null) }
     val takePictureLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
@@ -87,7 +84,6 @@ fun RegistrarseScreen(
         )
     }
 
-    // Navegación cuando termina OK
     LaunchedEffect(ui.ok) { if (ui.ok) onRegistered() }
 
     Scaffold(
@@ -110,7 +106,6 @@ fun RegistrarseScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // RUN y DV
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = ui.run, 
@@ -173,7 +168,6 @@ fun RegistrarseScreen(
                 singleLine = true
             )
 
-            // Imagen: cámara / galería
             Text("Foto de perfil (Opcional)")
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -205,7 +199,6 @@ fun RegistrarseScreen(
                 }
             }
 
-            // Info de imagen seleccionada
             if (ui.imagenFile != null) {
                 Text(
                     text = "Imagen: ${ui.imagenFile!!.name}",
