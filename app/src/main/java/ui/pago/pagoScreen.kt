@@ -42,8 +42,9 @@ fun PagoScreen(
     var expandedMetodoPago by remember { mutableStateOf(false) }
 
 
-    var pagoRealizado by remember { mutableStateOf(false) }
+
     val scope = rememberCoroutineScope()
+    var procesandoPago by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     val total = cartViewModel.cartItems.sumOf { it.productos.precio * it.cantidad }
@@ -137,38 +138,38 @@ fun PagoScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = {
-                    pagoRealizado = true
+                    onClick = {
+                        scope.launch {
+                            procesandoPago = true
+                            kotlinx.coroutines.delay(500)
+                            procesandoPago = false
 
-                    cartViewModel.clearCart()
-
-                    scope.launch {
-                        snackbarHostState.showSnackbar("Pago realizado con éxito 🎉")
-                    }
-
-                    scope.launch {
-                        kotlinx.coroutines.delay(1500)
-                        navController.navigate(BottomItem.Home.route) {
-                            popUpTo(ui.app.Route.Principal.path) { inclusive = true }
-                            launchSingleTop = true
+                            cartViewModel.clearCart()
+                            snackbarHostState.showSnackbar("Pago realizado con éxito 🎉")
+                            kotlinx.coroutines.delay(1000)
+                            navController.navigate(BottomItem.Home.route) {
+                                popUpTo(ui.app.Route.Principal.path) { inclusive = true }
+                                launchSingleTop = true
+                            }
                         }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = direccion.isNotBlank() &&
-                        recibe.isNotBlank() &&
-                        contacto.isNotBlank()
-            ) {
-                Text("Pagar ahora")
-            }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = direccion.isNotBlank() &&
+                            recibe.isNotBlank() &&
+                            contacto.isNotBlank() &&
+                            metodoPago.isNotEmpty()
+                ) {
+                    Text("Pagar ahora")
+                }
 
-            if (pagoRealizado) {
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    "Procesando pago...",
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
+
+                if (procesandoPago) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        "Procesando pago...",
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
         }
     }
 }
