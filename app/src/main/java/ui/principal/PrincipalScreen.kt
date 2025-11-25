@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -32,6 +33,8 @@ import com.example.prueba.ui.carrito.CartViewModel
 import com.example.prueba.vmfactory.ProfileVMFactory
 import ui.Fav.FavoritosViewModel
 import ui.feriados.FeriadoViewModel
+import ui.pedido.PedidoScreen
+import java.security.Principal
 
 // --- Bottom items ---
 sealed class BottomItem(
@@ -43,14 +46,16 @@ sealed class BottomItem(
     data object Home : BottomItem("home", "Inicio", Icons.Outlined.Home)
     data object Favs : BottomItem("favs", "Favoritos", Icons.Outlined.FavoriteBorder)
     data object Cart : BottomItem("cart", "Carrito", Icons.Outlined.ShoppingCart, badge = 3)
-    data object Agenda : BottomItem("agenda", "Agenda", Icons.Outlined.PlayArrow)
+    data object Agenda : BottomItem("agenda", "Agenda", Icons.Outlined.CalendarMonth)
+    data object pedido : BottomItem("pedido", "Pedido", Icons.Outlined.ListAlt)
     data object More : BottomItem("more", "Más", Icons.Outlined.Menu)
-
     data object Feriados : BottomItem("feriados", "Feriados", Icons.Outlined.Info)
+
+
 }
 
 private val bottomItems = listOf(
-    BottomItem.Home, BottomItem.Favs, BottomItem.Cart, BottomItem.Agenda,  BottomItem.Feriados , BottomItem.More
+    BottomItem.Home, BottomItem.Favs, BottomItem.Cart, BottomItem.Agenda,  BottomItem.pedido , BottomItem.More
 )
 
 @Composable
@@ -59,9 +64,10 @@ private fun BottomBar(
     cartViewModel: CartViewModel,
     onHomeTap: () -> Unit
 ) {
+    var showMoreSheet by remember { mutableStateOf(false) }
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
-    
+
     // Calculamos el badge total
     val totalItems = cartViewModel.cartItems.sumOf { it.cantidad }
 
@@ -117,10 +123,12 @@ fun PrincipalScreen(
 
     var expanded by remember { mutableStateOf(false) }
     val tabsNav = rememberNavController()
-    
+
     // ViewModels compartidos
     val cartViewModel: CartViewModel = viewModel()
     val favoritosViewModel: FavoritosViewModel = viewModel()
+
+
 
     LaunchedEffect(state.loggedOut) {
         if (state.loggedOut) onLogout()
@@ -276,10 +284,12 @@ fun PrincipalScreen(
 
             // CARRITO
             composable(BottomItem.Cart.route) {
-                CarritoScreen(cartViewModel = cartViewModel,
-                    onPagarClick = onCheckout )
+                CarritoScreen(
+                    cartViewModel = cartViewModel,
+                    navController = tabsNav // Solo pasamos el NavController
+                )
             }
-            
+
             // ... (Agenda y Más quedan igual)
             composable(BottomItem.Agenda.route) {
                 val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
@@ -296,11 +306,9 @@ fun PrincipalScreen(
                 }
             }
 
-            // FERIADOS
-            composable(BottomItem.Feriados.route) {
-                // ViewModel sin factory (tiene constructor por defecto usando el repo)
-                val fvm: FeriadoViewModel = viewModel()
-                ui.feriados.FeriadoScreen(viewModel = fvm)
+
+            composable(BottomItem.pedido.route) {
+                PedidoScreen()
             }
 
             composable(BottomItem.More.route) {
@@ -310,6 +318,16 @@ fun PrincipalScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
                 ) {
                     Text("Más opciones")
+                    Button(
+                        onClick = {
+                            tabsNav.navigate(BottomItem.Feriados.route)
+                        }
+                    ) {
+                        Icon(Icons.Outlined.CalendarToday, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Ver feriados")
+                    }
+
                     Button(onClick = { vm.logout() }) {
                         Icon(Icons.Outlined.Close, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
@@ -327,4 +345,8 @@ fun PrincipalScreen(
             }
         }
     }
+}@Preview(showBackground = true)
+@Composable
+fun PrincipalScreenPreview() {
+    PrincipalScreen()
 }

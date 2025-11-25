@@ -24,7 +24,7 @@ import ui.app.Route
 @Composable
 fun CarritoScreen(
     cartViewModel: CartViewModel = viewModel(),
-    navController: NavController // Recibimos el NavController
+    navController: NavController
 ) {
     val cartItems = cartViewModel.cartItems 
     val context = LocalContext.current
@@ -87,9 +87,9 @@ fun CarritoScreen(
         Text("Total: $${cartViewModel.calcularTotal()}", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(8.dp))
         
-        // Botón de Pagar que navega a la pantalla de pago
+        // CORRECCIÓN: Usar la ruta 'pagar' que sí existe
         Button(
-            onClick = { navController.navigate(Route.Checkout.path) },
+            onClick = { navController.navigate(Route.pagar.path) },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Ir a Pagar")

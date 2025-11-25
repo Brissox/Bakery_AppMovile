@@ -25,12 +25,9 @@ class PrincipalViewModel : ViewModel() {
     private val repository = ProductoRepository()
     private val usuarioRepository = UsuarioRepository()
 
-
-    // ---------- Estado general ----------
     private val _ui = MutableStateFlow(PrincipalUiState())
     val ui: StateFlow<PrincipalUiState> = _ui.asStateFlow()
 
-    // ---------- Fuente y filtros ----------
     private val _fuente = MutableStateFlow<List<Productos>>(emptyList())
 
     private val _categorias = MutableStateFlow<List<String>>(listOf("Todos"))
@@ -89,20 +86,16 @@ class PrincipalViewModel : ViewModel() {
     }
 
 
-
     fun cargarDatosUsuario(uid: String) {
         viewModelScope.launch {
             try {
-                // Suponiendo que agregaste este método en tu repositorio como te expliqué antes
                 val respuesta = usuarioRepository.buscarPorFirebase(uid)
-                // Aquí manejas la respuesta (ej: guardar datos extra del usuario en _ui)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
 
-    /** Reset al tocar Inicio: categoría base + recarga. */
     fun refreshHome() {
         _categoriaSel.value = "Todos"
         cargarProductos()

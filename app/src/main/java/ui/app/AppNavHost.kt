@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.prueba.ui.carrito.CarritoScreen
 import com.example.prueba.ui.home.HomeScreen
 import com.example.prueba.ui.login.LoginScreen
+import com.example.prueba.ui.principal.BottomItem
 import com.example.prueba.ui.principal.PrincipalScreen
 import com.example.prueba.ui.register.RegistrarseScreen
 import com.example.prueba.ui.recover.RecuperarPasswordScreen
@@ -51,7 +52,7 @@ fun AppNavHost() {
                         popUpTo(Route.HomeRoot.path) { inclusive = true } // limpia back stack
                         launchSingleTop = true
                     }
-                }
+                },
             )
         }
 
@@ -78,17 +79,21 @@ fun AppNavHost() {
                 }
             )
         }
-
-        composable(Route.pago.path) {
-            PagoScreen(
-                onSent = {
-                    nav.navigate(Route.pago.path) {
-                        popUpTo(Route.HomeRoot.path) { inclusive = false }
+        composable(Route.Principal.path) {
+            PrincipalScreen(
+                onLogout = {
+                    nav.navigate(Route.HomeRoot.path) {
+                        popUpTo(Route.HomeRoot.path) { inclusive = true }
                         launchSingleTop = true
                     }
+                },
+                // 1. AGREGAR ESTO: Cuando Principal pida ir al checkout, navegamos a Pagar
+                onCheckout = {
+                    nav.navigate("pagar_screen")
                 }
             )
         }
+
 
 
 
