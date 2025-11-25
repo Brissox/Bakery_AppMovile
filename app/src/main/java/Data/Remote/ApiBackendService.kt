@@ -24,8 +24,6 @@ interface ApiBackendService {
         @Part imagen: MultipartBody.Part
     ): Response<ResponseBody>
 
-    // --- Corrección aquí ---
-
     @GET("Usuarios/{rut}/imagen")
     suspend fun getImageByRut(@Path("rut") rut: String): Response<ResponseBody>
 

@@ -11,7 +11,6 @@ interface ApiService {
     @GET("/posts")
     suspend fun getPosts(): List<Post>
 
-    // Cambiamos a ResponseBody para obtener el texto "crudo" y depurar
     @GET("api/v1/Productos")
     suspend fun getProducto(): ProductoResponse
 
