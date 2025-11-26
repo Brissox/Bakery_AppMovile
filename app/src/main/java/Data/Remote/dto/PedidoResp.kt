@@ -1,14 +1,21 @@
 package Data.Remote.dto
 
-import java.util.Date
 
-data class PedidoResp (
-    val FECHA: Date,
-    val CANTIDAD_PRODUCTOS: Int,
-    val TOTAL: Int,
-    val METODO_DE_PAGO: String,
-    val Descuentos: Int,
-    val CANTIDAD: Int,
-    val PRECIO_UNITARIO: Int,
-    val SUBTOTAL: Int
+
+
+data class PedidoResp(
+    val idUsuario: Long,
+    val fecha: String,
+    val cantidad_productos: Int,
+    val total: Int,
+    val metodo_de_pago: String,
+    val descuentos: Int?,
+    val detalles: List<DetallePedidot>
+)
+
+data class DetallePedidot(
+    val idProducto: Long,
+    val cantidad: Int,
+    val precioUnitario: Int,
+    val subtotal: Int
 )

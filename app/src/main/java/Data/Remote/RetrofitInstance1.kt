@@ -24,12 +24,21 @@ object RetrofitInstance1 {
         }
         .build()
 
-    val api: ApiService by lazy {
+    val api: ApiBackendService by lazy {
         Retrofit.Builder()
             .baseUrl("http://10.0.2.2:8084/")
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(ApiService::class.java)
+            .create(ApiBackendService::class.java)
+    }
+
+    val apip: ApiBackendService by lazy {
+        Retrofit.Builder()
+            .baseUrl("http://10.0.2.2:8085/")
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(ApiBackendService::class.java)
     }
 }

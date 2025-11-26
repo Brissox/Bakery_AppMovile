@@ -1,7 +1,12 @@
 package Data.Remote
 
+import Data.Remote.dto.LoginRequestDto
+import Data.Remote.dto.LoginResponseDto
+import Data.Remote.dto.PedidoDto
+import Data.Remote.dto.PedidoResp
 import Data.Remote.dto.UsuarioDto
 import Data.Remote.dto.UsuarioResp
+import Data.model.ProductoResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
@@ -15,6 +20,28 @@ interface ApiBackendService {
 
     @GET("Usuarios/uid/{uidFb}")
     suspend fun getByFirebase(@Path("uidFb") uidFb: String): Response<UsuarioResp>
+
+    @GET("/api/v1/Pedidos/User/{idUsuario}")
+    suspend fun getPedidos(@Path("idUsuario") idUsuario: Int): List<PedidoResp>
+
+
+    @POST("Pedidos")
+    suspend fun crearPedido(@Body pedido: PedidoDto): Response<ResponseBody>
+
+    @GET("Pedidos")
+    suspend fun getPedidos(): List<PedidoResp>
+
+    @GET("api/v1/Productos")
+    suspend fun getProducto(): ProductoResponse
+
+
+    @POST("auth/login")
+    suspend fun login(
+        @Body request: LoginRequestDto
+    ): Response<LoginResponseDto>
+
+
+
 
     @Multipart
     @PUT("Usuarios/{run}")
