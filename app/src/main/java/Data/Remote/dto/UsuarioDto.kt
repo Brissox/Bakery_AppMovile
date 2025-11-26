@@ -1,7 +1,7 @@
 package Data.Remote.dto
 
 data class UsuarioDto(
-    val uidFb: String,
+    val uidFb: String?,
     val nombre: String,
     val apellidoPaterno: String = "",
     val apellidoMaterno: String = "",
@@ -14,7 +14,7 @@ data class UsuarioDto(
     val ciudad: String = "",
     val direccion: String = "",
     val codigoDesc: String? = "",
-    val run: String,
+    val run: Int,
     val dv: String,
     val estado: String = "A",
     val imagen: String? = null,

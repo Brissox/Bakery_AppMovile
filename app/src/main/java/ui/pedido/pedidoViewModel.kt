@@ -1,46 +1,54 @@
 package ui.pedido
 
+import Data.Remote.RetrofitInstance1
 import Data.Remote.dto.PedidoResp
-import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
-import java.text.SimpleDateFormat
-import java.util.*
+import androidx.lifecycle.viewModelScope
+import androidx.compose.runtime.mutableStateListOf
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import ui.app.AppViewModel
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-class PedidoViewModel : ViewModel() {
+class PedidoViewModel(private val appViewModel: AppViewModel) : ViewModel() {
 
     val pedidos = mutableStateListOf<PedidoResp>()
-
-    private val fechaFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    private val fechaFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
 
     init {
-        // Ejemplos de pedidos
-        pedidos.addAll(
-            listOf(
-                PedidoResp(
-                    FECHA = Date(),
-                    CANTIDAD_PRODUCTOS = 3,
-                    TOTAL = 15990,
-                    METODO_DE_PAGO = "Tarjeta Débito",
-                    Descuentos = 1000,
-                    CANTIDAD = 1,
-                    PRECIO_UNITARIO = 7990,
-                    SUBTOTAL = 6990
-                ),
-                PedidoResp(
-                    FECHA = Date(),
-                    CANTIDAD_PRODUCTOS = 1,
-                    TOTAL = 9990,
-                    METODO_DE_PAGO = "Transferencia",
-                    Descuentos = 0,
-                    CANTIDAD = 1,
-                    PRECIO_UNITARIO = 9990,
-                    SUBTOTAL = 9990
-                )
-            )
-        )
+        viewModelScope.launch {
+            appViewModel.uidUsuario.collectLatest { uid ->
+                if (!uid.isNullOrEmpty()) {
+                    obtenerPedidos(appViewModel)
+                } else {
+                    pedidos.clear()
+                }
+            }
+        }
     }
 
-    fun formatFecha(date: Date): String {
-        return fechaFormat.format(date)
+    private fun obtenerPedidos(appViewModel: AppViewModel) {
+        viewModelScope.launch {
+            try {
+                val idUsuario = appViewModel.uidUsuario.value
+                if (idUsuario != null) {
+                    val lista = RetrofitInstance1.apip.getPedidos(idUsuario.toInt())
+                    pedidos.clear()
+                    pedidos.addAll(lista)
+                } else {
+                    pedidos.clear()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                pedidos.clear()
+            }
+        }
+    }
+
+
+
+    fun formatFecha(fecha: LocalDateTime?): String {
+        return fecha?.format(fechaFormat) ?: "Sin fecha"
     }
 }

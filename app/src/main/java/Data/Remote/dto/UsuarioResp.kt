@@ -3,7 +3,7 @@ package Data.Remote.dto
 
 data class UsuarioResp(
     val idUsuario: Int,
-    val uidFb: String,
+    val uidFb: String?,
     val nombre: String,
     val apellidoPaterno: String,
     val apellidoMaterno: String,

@@ -18,7 +18,6 @@ class CartDataStore(private val context: Context) {
     private val CART_KEY = stringPreferencesKey("cart_items")
     private val gson = Gson()
 
-    // Guardar lista completa del carrito
     suspend fun saveCart(items: List<CartItem>) {
         val json = gson.toJson(items)
         context.cartDataStore.edit { prefs ->
@@ -26,7 +25,6 @@ class CartDataStore(private val context: Context) {
         }
     }
 
-    // Leer carrito
     fun getCart(): Flow<List<CartItem>> =
         context.cartDataStore.data.map { prefs ->
             val json = prefs[CART_KEY] ?: "[]"
@@ -34,7 +32,6 @@ class CartDataStore(private val context: Context) {
             gson.fromJson(json, type)
         }
 
-    // Vaciar carrito
     suspend fun clearCart() {
         context.cartDataStore.edit { prefs ->
             prefs[CART_KEY] = "[]"

@@ -33,6 +33,7 @@ import com.example.prueba.ui.carrito.CarritoScreen
 import com.example.prueba.ui.carrito.CartViewModel
 import com.example.prueba.vmfactory.ProfileVMFactory
 import ui.Fav.FavoritosViewModel
+import ui.app.AppViewModel
 import ui.feriados.FeriadoViewModel
 import ui.pago.PagoScreen
 import ui.pedido.PedidoScreen
@@ -112,8 +113,9 @@ private fun BottomBar(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PrincipalScreen(
-    onLogout: () -> Unit = {},
-    onCheckout: () -> Unit = {},
+    appViewModel: AppViewModel,
+    onLogout: () -> Unit,
+    onCheckout: () -> Unit,
     vm: PrincipalViewModel = viewModel()
 ) {
     val state by vm.ui.collectAsState()
@@ -343,15 +345,11 @@ fun PrincipalScreen(
             composable("pago") {
                 PagoScreen(
                     navController = tabsNav,
-                    cartViewModel = cartViewModel
+                    cartViewModel = cartViewModel,
+                    appViewModel = appViewModel
+
                 )
             }
         }
         }
     }
-
-@Preview(showBackground = true)
-@Composable
-fun PrincipalScreenPreview() {
-    PrincipalScreen()
-}

@@ -1,21 +1,15 @@
 package com.example.prueba.ui.home
 
-
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.prueba.R
 import ui.home.components.AnimatedLogo
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,8 +41,8 @@ private fun HomeContent(
     onRecoverClick: () -> Unit
 ) {
     Column(
-        modifier = modifier.fillMaxSize().padding(16.dp),
-        verticalArrangement =Arrangement.Bottom,
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AnimatedLogo(
@@ -56,28 +50,68 @@ private fun HomeContent(
                 .fillMaxWidth()
                 .height(250.dp),
         )
-        Spacer(modifier = Modifier.height(50.dp))
-
-        Text("¡Bienvenido!",  fontSize = 30.sp)
 
         Spacer(modifier = Modifier.height(50.dp))
 
-        Button(onClick = onLoginClick) { Text("Login",
-            fontSize = 22.sp,
-            modifier = Modifier.size(width = 250.dp, height = 40.dp)
-                .wrapContentHeight()
-                .fillMaxWidth(),
-            textAlign = TextAlign.Center) }
+        Text(
+            "¡Bienvenido!",
+            fontSize = 30.sp,
+            textAlign = TextAlign.Center
+        )
 
         Spacer(modifier = Modifier.height(50.dp))
 
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            TextButton(onClick = onRegisterClick) { Text("Registrarse", fontSize = 18.sp) }
-            TextButton(onClick = onRecoverClick) { Text("Recuperar contraseña", fontSize = 18.sp) }
+        Button(
+            onClick = onLoginClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
+        ) {
+            Text(
+                "Login",
+                fontSize = 22.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
+
+        Spacer(modifier = Modifier.height(50.dp))
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            TextButton(
+                onClick = onRegisterClick,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    "Registrarse",
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            TextButton(
+                onClick = onRecoverClick,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    "Recuperar contraseña",
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+
         Spacer(modifier = Modifier.height(100.dp))
 
-        Text("B2C Copyright - 2025",  fontSize = 15.sp)
+        Text(
+            "B2C Copyright - 2025",
+            fontSize = 15.sp,
+            textAlign = TextAlign.Center
+        )
     }
 }
 

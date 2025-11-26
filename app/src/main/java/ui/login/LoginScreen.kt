@@ -1,37 +1,41 @@
 package com.example.prueba.ui.login
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.foundation.Image
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.prueba.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     onBack: () -> Unit,
-    onLoginSuccess: () -> Unit,
+    onLoginSuccess: (uid: String) -> Unit,
     vm: LoginViewModel = viewModel()
 ) {
-
     val state by vm.ui.collectAsState()
 
     LaunchedEffect(state.loggedIn) {
-        if (state.loggedIn) onLoginSuccess()
+        if (state.loggedIn) {
+            state.user?.uid?.let { uid ->
+                onLoginSuccess(uid)
+            }
+        }
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
+
     LaunchedEffect(state.message) {
         state.message?.let {
             snackbarHostState.showSnackbar(it)
@@ -40,15 +44,13 @@ fun LoginScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Login") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Volver"
-                        )
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                     }
                 }
             )
@@ -76,10 +78,8 @@ fun LoginScreen(
                         .height(150.dp),
                     contentScale = ContentScale.Fit
                 )
-                Text(
-                    text = "Introduzca su cuenta",
-                    style = MaterialTheme.typography.headlineSmall
-                )
+
+                Text("Introduzca su cuenta", style = MaterialTheme.typography.headlineSmall)
 
                 OutlinedTextField(
                     value = state.email,
@@ -100,8 +100,8 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                if (state.error != null) {
-                    Text(state.error!!, color = MaterialTheme.colorScheme.error)
+                state.error?.let {
+                    Text(it, color = MaterialTheme.colorScheme.error)
                 }
 
                 Button(
@@ -114,9 +114,7 @@ fun LoginScreen(
             }
 
             if (state.loading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(48.dp)
-                )
+                CircularProgressIndicator(modifier = Modifier.size(48.dp))
             }
         }
     }

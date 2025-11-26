@@ -2,6 +2,7 @@ package ui.app
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -21,6 +22,7 @@ fun AppNavHost() {
 
     val navController = rememberNavController()
     val cartViewModel: CartViewModel = viewModel()
+    val appViewModel: AppViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -38,32 +40,17 @@ fun AppNavHost() {
         composable(Route.Login.path) {
             LoginScreen(
                 onBack = { navController.popBackStack() },
-                onLoginSuccess = {
-                    navController.navigate(Route.Principal.path) {
-                        launchSingleTop = true
-                    }
-                }
-            )
-        }
+                onLoginSuccess = { uid ->
+                        appViewModel.setUid(uid)
+                        navController.navigate(Route.Principal.path)
 
-        composable(Route.Register.path) {
-            RegistrarseScreen(
-                onBack = { navController.popBackStack() },
-                onRegistered = {
-                    navController.navigate(Route.Login.path)
                 }
-            )
-        }
-
-        composable(Route.RecoverPassword.path) {
-            RecuperarPasswordScreen(
-                onBack = { navController.popBackStack() },
-                onSent = { navController.navigate(Route.Login.path) }
             )
         }
 
         composable(Route.Principal.path) {
             PrincipalScreen(
+                appViewModel = appViewModel,
                 onLogout = {
                     navController.navigate(Route.HomeRoot.path) {
                         popUpTo(Route.HomeRoot.path) { inclusive = true }
@@ -76,18 +63,30 @@ fun AppNavHost() {
             )
         }
 
-        composable("carrito") {
-            CarritoScreen(
-                navController = navController,
-                cartViewModel = cartViewModel
-            )
-        }
-
         composable(Route.Pago.path) {
             PagoScreen(
                 navController = navController,
-                cartViewModel = cartViewModel
+                cartViewModel = cartViewModel,
+                appViewModel = appViewModel
             )
+        }
+
+        composable(Route.Register.path) {
+            RegistrarseScreen(
+                onBack = { navController.popBackStack() },
+                onRegistered = { navController.navigate(Route.Login.path) }
+            )
+        }
+
+        composable(Route.RecoverPassword.path) {
+            RecuperarPasswordScreen(
+                onBack = { navController.popBackStack() },
+                onSent = { navController.navigate(Route.Login.path) }
+            )
+        }
+
+        composable("carrito") {
+            CarritoScreen(navController = navController, cartViewModel = cartViewModel)
         }
     }
 }

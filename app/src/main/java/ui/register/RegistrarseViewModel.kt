@@ -55,7 +55,7 @@ class RegistrarseViewModel(
             val uid = firebaseUser.uid!!
 
             val dto = UsuarioDto(
-                run = _ui.value.run,
+                run = _ui.value.run.toIntOrNull() ?: 0,
                 dv = _ui.value.dv,
                 usuario = _ui.value.usuario,
                 correo = _ui.value.email,

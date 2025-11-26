@@ -2,19 +2,24 @@ package Data.Remote.dto
 
 
 
+import java.time.LocalDateTime
 
 data class PedidoResp(
+    val id: Long,
     val idUsuario: Long,
-    val fecha: String,
-    val cantidad_productos: Int,
+    val fechaCreacion: LocalDateTime,
+    val cantidadProductos: Int,
+    val metodoPago: String,
+    val descuentos: Int = 0,
     val total: Int,
-    val metodo_de_pago: String,
-    val descuentos: Int?,
-    val detalles: List<DetallePedidot>
+    val estado: String,
+    val items: List<ItemPedidoResp>
 )
 
-data class DetallePedidot(
+data class ItemPedidoResp(
+    val id: Long,
     val idProducto: Long,
+    val nombreProducto: String,
     val cantidad: Int,
     val precioUnitario: Int,
     val subtotal: Int
