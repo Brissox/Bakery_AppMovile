@@ -10,11 +10,9 @@ import io.mockk.mockk
 class CartViewModelTest : StringSpec({
 
     "agregarProducto debe añadir producto a la lista" {
-        // Mock del Application para el CartViewModel
         val application = mockk<android.app.Application>(relaxed = true)
         val vm = CartViewModel(application)
 
-        // Creamos producto de prueba
         val producto1 = Productos(
             id_producto = 1,
             nombre = "Producto 1",
@@ -28,10 +26,8 @@ class CartViewModelTest : StringSpec({
 
         )
 
-        // Agregamos producto al carrito
         vm.agregarProducto(producto1)
 
-        // Verificamos que la lista tenga 1 elemento y sea el correcto
         vm.cartItems.size shouldBe 1
         vm.cartItems[0].productos shouldBe producto1
         vm.cartItems[0].cantidad shouldBe 1
@@ -73,9 +69,7 @@ class CartViewModelTest : StringSpec({
             sku = "12312312",
             enlaceimg = "imagen1.jpg",
             estado = "A"
-
-
-
+        )
         vm.agregarProducto(producto)
         vm.clearCart()
 

@@ -2,7 +2,6 @@ package ui.app
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -12,8 +11,8 @@ import com.example.prueba.ui.carrito.CartViewModel
 import com.example.prueba.ui.home.HomeScreen
 import com.example.prueba.ui.login.LoginScreen
 import com.example.prueba.ui.principal.PrincipalScreen
-import com.example.prueba.ui.register.RegistrarseScreen
 import com.example.prueba.ui.recover.RecuperarPasswordScreen
+import com.example.prueba.ui.register.RegistrarseScreen
 import ui.pago.PagoScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,12 +63,15 @@ fun AppNavHost() {
         }
 
         composable(Route.Pago.path) {
+            val cartViewModel: CartViewModel = viewModel()
             PagoScreen(
+                appViewModel = appViewModel,
                 navController = navController,
                 cartViewModel = cartViewModel,
-                appViewModel = appViewModel
+                cartItems = cartViewModel.cartItems.toList()
             )
         }
+
 
         composable(Route.Register.path) {
             RegistrarseScreen(
@@ -88,5 +90,7 @@ fun AppNavHost() {
         composable("carrito") {
             CarritoScreen(navController = navController, cartViewModel = cartViewModel)
         }
+
+
     }
 }
