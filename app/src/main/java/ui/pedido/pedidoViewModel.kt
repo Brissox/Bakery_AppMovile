@@ -1,54 +1,55 @@
 package ui.pedido
 
-import Data.Remote.RetrofitInstance1
 import Data.Remote.dto.PedidoResp
+import Data.repository.pedidoRepository
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.compose.runtime.mutableStateListOf
+import com.example.prueba.repository.auth.FirebaseAuthDataSource
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import ui.app.AppViewModel
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
-class PedidoViewModel(private val appViewModel: AppViewModel) : ViewModel() {
+data class PedidoUiState(
+    val loading: Boolean = false,
+    val items: List<PedidoResp> = emptyList(),
+    val error: String? = null
+)
 
-    val pedidos = mutableStateListOf<PedidoResp>()
-    private val fechaFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+class PedidoViewModel(
+    private val authRepo: FirebaseAuthDataSource,
+    private val repo: pedidoRepository = pedidoRepository()
+) : ViewModel() {
+
+
+    private val _uiState = MutableStateFlow(PedidoUiState(loading = true))
+    val uiState: StateFlow<PedidoUiState> = _uiState
 
     init {
-        viewModelScope.launch {
-            appViewModel.uidUsuario.collectLatest { uid ->
-                if (!uid.isNullOrEmpty()) {
-                    obtenerPedidos(appViewModel)
-                } else {
-                    pedidos.clear()
-                }
-            }
+        val user = authRepo.currentUser()
+        if (user?.uid != null) {
+            cargarPedidos(user.uid)
+        } else {
+            _uiState.value = PedidoUiState(
+                loading = false,
+                error = "Usuario no autenticado"
+            )
         }
     }
 
-    private fun obtenerPedidos(appViewModel: AppViewModel) {
+    fun cargarPedidos(uid: String) {
+        _uiState.value = PedidoUiState(loading = true)
+
         viewModelScope.launch {
             try {
-                val idUsuario = appViewModel.uidUsuario.value
-                if (idUsuario != null) {
-                    val lista = RetrofitInstance1.apip.getPedidos(idUsuario.toInt())
-                    pedidos.clear()
-                    pedidos.addAll(lista)
-                } else {
-                    pedidos.clear()
-                }
+                val data = repo.listarPedidos(uid)
+                _uiState.value = PedidoUiState(items = data)
             } catch (e: Exception) {
-                e.printStackTrace()
-                pedidos.clear()
+                _uiState.value = PedidoUiState(
+                    error = e.message ?: "Error desconocido"
+                )
             }
         }
-    }
-
-
-
-    fun formatFecha(fecha: LocalDateTime?): String {
-        return fecha?.format(fechaFormat) ?: "Sin fecha"
     }
 }

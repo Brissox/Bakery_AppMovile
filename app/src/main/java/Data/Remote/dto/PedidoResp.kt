@@ -6,8 +6,8 @@ import java.time.LocalDateTime
 
 data class PedidoResp(
     val id: Long,
-    val idUsuario: Long,
-    val fechaCreacion: LocalDateTime,
+    val uid: String,
+    val fechaCreacion: String?,
     val cantidadProductos: Int,
     val metodoPago: String,
     val descuentos: Int = 0,

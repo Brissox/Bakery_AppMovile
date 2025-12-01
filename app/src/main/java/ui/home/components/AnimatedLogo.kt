@@ -20,7 +20,6 @@ fun AnimatedLogo(
     logoRes: Int = R.drawable.logo,
     contentScale: ContentScale = ContentScale.Fit
 ) {
-    // Animación de entrada (escala + opacidad)
     var appeared by remember { mutableStateOf(false) }
 
     val enterScale by animateFloatAsState(
@@ -38,7 +37,6 @@ fun AnimatedLogo(
         label = "enterAlpha"
     )
 
-    // Animaciones infinitas (pulso + balanceo suave)
     val infinite = rememberInfiniteTransition(label = "logoInfinite")
 
     val pulse by infinite.animateFloat(
@@ -61,7 +59,6 @@ fun AnimatedLogo(
         label = "tilt"
     )
 
-    // Efecto de presión (feedback táctil)
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     val pressScale by animateFloatAsState(
@@ -70,7 +67,6 @@ fun AnimatedLogo(
         label = "pressScale"
     )
 
-    // Disparar la animación inicial
     LaunchedEffect(Unit) { appeared = true }
 
     Image(

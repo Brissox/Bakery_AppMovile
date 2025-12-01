@@ -2,7 +2,7 @@
 
 
     data class PedidoDto(
-        val idUsuario: Long,
+        val uid: String,
         val cantidad_productos: Int,
         val metodo_de_pago: String,
         val descuentos: Int = 0,
