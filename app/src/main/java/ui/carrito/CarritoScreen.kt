@@ -55,7 +55,7 @@ fun CarritoScreen(
                     Row(modifier = Modifier.padding(12.dp)) {
 
                         AsyncImage(
-                            model = item.productos.enlaceimg, // URL directa del backend
+                            model = item.productos.enlaceimg,
                             contentDescription = item.productos.nombre,
                             modifier = Modifier
                                 .size(100.dp)
