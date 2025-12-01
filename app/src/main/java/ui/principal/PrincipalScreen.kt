@@ -1,7 +1,5 @@
 package com.example.prueba.ui.principal
 
-import Data.repository.UsuarioRepository
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -16,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -24,20 +21,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.prueba.data.media.MediaRepository
+import com.example.prueba.repository.auth.FirebaseAuthDataSource
+import com.example.prueba.ui.carrito.CarritoScreen
+import com.example.prueba.ui.carrito.CartViewModel
 import com.example.prueba.ui.principal.components.UiProductosCard
 import com.example.prueba.ui.profile.ProfileScreen
 import com.example.prueba.ui.profile.ProfileViewModel
-import com.example.prueba.repository.auth.FirebaseAuthDataSource
-import com.example.prueba.data.media.MediaRepository
-import com.example.prueba.ui.carrito.CarritoScreen
-import com.example.prueba.ui.carrito.CartViewModel
 import com.example.prueba.vmfactory.ProfileVMFactory
 import ui.Fav.FavoritosViewModel
 import ui.app.AppViewModel
-import ui.feriados.FeriadoViewModel
 import ui.pago.PagoScreen
-import ui.pedido.PedidoScreen
-import java.security.Principal
+import ui.pedido.PedidoViewModel
+import ui.pedido.pedidoScreen
+import ui.vmfactory.PedidoVMFactory
 
 sealed class BottomItem(
     val route: String,
@@ -118,6 +115,7 @@ fun PrincipalScreen(
     onCheckout: () -> Unit,
     vm: PrincipalViewModel = viewModel()
 ) {
+
     val state by vm.ui.collectAsState()
     val categoriaSel by vm.categoriaSel.collectAsState()
     val productos by vm.productosFiltrados.collectAsState()
@@ -221,7 +219,9 @@ fun PrincipalScreen(
 
                     if (state.loading) {
                         Box(
-                            Modifier.fillMaxWidth().height(200.dp),
+                            Modifier
+                                .fillMaxWidth()
+                                .height(200.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             CircularProgressIndicator()
@@ -306,27 +306,30 @@ fun PrincipalScreen(
             }
 
             composable(BottomItem.pedido.route) {
-                PedidoScreen()
+
+                val authDataSource = remember { FirebaseAuthDataSource() }
+
+                val factory = remember {
+                    PedidoVMFactory(authDataSource)
+                }
+                val pvm: PedidoViewModel = viewModel(factory = factory)
+
+                pedidoScreen(viewModel = pvm)
             }
+
+
+
 
             composable(BottomItem.More.route) {
                 Column(
-                    Modifier.fillMaxSize().padding(24.dp),
+                    Modifier
+                        .fillMaxSize()
+                        .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
                 ) {
                     Text("Más opciones")
-                    Button(
-                        onClick = {
-                            tabsNav.navigate(BottomItem.Feriados.route)
-                        }
-                    ) {
-                        Icon(Icons.Outlined.CalendarToday, contentDescription = null)
-                        Spacer(Modifier.width(8.dp))
-                        Text("Ver feriados")
-                    }
-
-                    Button(onClick = { vm.logout() }) {
+                        Button(onClick = { vm.logout() }) {
                         Icon(Icons.Outlined.Close, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
                         Text(if (state.loading) "Cerrando..." else "Cerrar sesión")
@@ -344,9 +347,10 @@ fun PrincipalScreen(
 
             composable("pago") {
                 PagoScreen(
+                    appViewModel = appViewModel,
                     navController = tabsNav,
-                    cartViewModel = cartViewModel,
-                    appViewModel = appViewModel
+                    cartItems = cartViewModel.cartItems.toList(),
+                    cartViewModel = cartViewModel
 
                 )
             }

@@ -14,7 +14,7 @@ data class RecordatorioUiState(
     val items: List<Recordatorio> = emptyList(),
     val editingId: Long? = null,
     val mensaje: String = "",
-    val fechaCreacion: String = hoy(),  // dd/MM/yyyy
+    val fechaCreacion: String = hoy(),
     val loading: Boolean = false,
     val error: String? = null,
 ) {

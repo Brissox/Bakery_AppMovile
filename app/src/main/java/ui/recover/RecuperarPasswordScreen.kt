@@ -29,12 +29,10 @@ fun RecuperarPasswordScreen(
 
     val state by vm.ui.collectAsState()
 
-    // Navegación reactiva: si el correo fue enviado
     LaunchedEffect(state.sent) {
         if (state.sent) onSent()
     }
 
-    // Snackbar de mensajes
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(state.message) {
         state.message?.let {
@@ -74,12 +72,12 @@ fun RecuperarPasswordScreen(
             ) {
 
                 Image(
-                    painter = painterResource(id = R.drawable.logo), //carga el drawable logo
+                    painter = painterResource(id = R.drawable.logo),
                     contentDescription = "Logo App",
                     modifier = Modifier
-                        .fillMaxWidth() //todo el ancho
-                        .height(150.dp), //y 150dp de alto
-                    contentScale = ContentScale.Fit //ajusta la imagen sin recortarla para que quepa
+                        .fillMaxWidth()
+                        .height(150.dp),
+                    contentScale = ContentScale.Fit
                 )
                 Text(
                     text = "Introduzca su correo",
