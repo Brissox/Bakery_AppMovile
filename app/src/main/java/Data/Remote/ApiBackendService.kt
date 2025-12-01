@@ -20,19 +20,33 @@ interface ApiBackendService {
     @GET("Usuarios/uid/{uidFb}")
     suspend fun getByFirebase(@Path("uidFb") uidFb: String): Response<UsuarioResp>
 
-    @GET("pedidos/{idUsuario}")
-    suspend fun getPedidos(@Path("idUsuario") idUsuario: Int): List<PedidoResp>
-
     @GET("Productos")
     suspend fun listarProductos(): Response<List<ProductoResp>>
-
 
     @POST("pedidos/crear")
     suspend fun crearPedido(@Body pedido: PedidoDto): Response<ResponseBody>
 
+    @GET("pedidos/uid/{uid}")
+    suspend fun ListarPedidos(@Path("uid") uidFb: String): Response<List<PedidoResp>>
+
 
     @GET("Productos")
     suspend fun getProducto(): ProductoResponse
+
+    @Multipart
+    @PUT("Usuarios/{uid}/imagen")
+    suspend fun actualizarImagen(
+        @Path("uid") uid: String,
+        @Part imagen: MultipartBody.Part
+    ): Response<ResponseBody>
+
+    @Multipart
+    @PUT("Usuarios/{uidFb}/imagen")
+    suspend fun actualizarSoloImagen(
+        @Path("uidFb") uidFb: String,
+        @Part imagen: MultipartBody.Part
+    ): Response<ResponseBody>
+
 
 
 

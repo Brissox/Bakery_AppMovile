@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 
 data class RegistrarseUiState(
@@ -32,6 +35,7 @@ class RegistrarseViewModel(
 
     private val _ui = MutableStateFlow(RegistrarseUiState())
     val ui: StateFlow<RegistrarseUiState> = _ui
+
 
     fun onRun(v: String) = _ui.update { it.copy(run = v.filter { char -> char.isDigit() }) }
 
@@ -69,10 +73,13 @@ class RegistrarseViewModel(
             if (!ok) throw IllegalStateException("Fallo al guardar usuario en backend")
 
             _ui.value.imagenFile?.let { file ->
-                userRepo.subirImagen(
-                    run = _ui.value.run,
-                    idFirebase = uid,
-                    file = file
+                userRepo.actualizarImagen(
+                    uid = uid,
+                    imagen = MultipartBody.Part.createFormData(
+                        "imagen",
+                        file.name,
+                        file.asRequestBody("image/*".toMediaTypeOrNull())
+                    )
                 )
             }
 

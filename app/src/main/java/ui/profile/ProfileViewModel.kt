@@ -6,7 +6,9 @@ import Data.repository.FirebaseAuthDataSource
 import Data.repository.UsuarioRepository
 import android.content.Context
 import android.net.Uri
+import android.os.FileUtils
 import android.util.Base64
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.prueba.data.media.MediaRepository
@@ -15,6 +17,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 
 data class ProfileUiState(
@@ -81,7 +87,6 @@ class ProfileViewModel(
     fun onNombreEdit(v: String) = _ui.update { it.copy(editingNombre = v) }
 
     fun guardarNombre() {
-        // De momento sólo actualizamos el estado local
         _ui.update { it.copy(nombre = it.editingNombre, msg = "Nombre actualizado (local)") }
     }
 
@@ -94,30 +99,48 @@ class ProfileViewModel(
         return mediaRepo.createImageUriForUser(context, uid)
     }
 
-    fun subirImagenDesdeUri(context: Context, uri: Uri) = viewModelScope.launch {
-        val rut = _ui.value.run ?: return@launch
-        val uid = _ui.value.uid ?: return@launch
+     fun subirImagen(uid: String, file: File, token: String) {
+        viewModelScope.launch {
+            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+            val body = MultipartBody.Part.createFormData("imagen", file.name, requestFile)
 
-        val file = uriToTempFile(context, uri)
-        _ui.update { it.copy(loading = true, msg = null, error = null) }
-        try {
-            // el repo devuelve Boolean; backend responde "Usuario actualizado" (texto)
-            userRepo.subirImagen(rut, uid, file)
-            // tras subir, volver a cargar el usuario para obtener la imagen actualizada en Base64
-            cargarDesdeBackend(uid)
-            _ui.update { it.copy(msg = "Imagen actualizada") }
-        } catch (e: Exception) {
-            android.util.Log.e("ProfileVM", "Error al subir imagen", e)
-            _ui.update { it.copy(loading = false, error = "Error al subir imagen: ${e.message}") }
-        } finally {
-            file.delete()
+            try {
+                val response = userRepo.actualizarImagen(uid,  body)
+                if (response.isSuccessful) {
+                    Log.d("ProfileVM", "Imagen subida correctamente")
+                } else {
+                    Log.e("ProfileVM", "Error al subir imagen: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e("ProfileVM", "Excepción al subir imagen", e)
+            }
         }
     }
+
+    fun subirImagenDesdeUri(context: Context, uri: Uri) {
+        val file = utils.FileUtils.getFileFromUri(context, uri)
+        val requestFile = file.asRequestBody("image/*".toMediaType())
+        val body = MultipartBody.Part.createFormData("imagen", file.name, requestFile)
+
+        viewModelScope.launch {
+            try {
+
+                val response = userRepo.actualizarImagen(_ui.value.uid!! ,body)
+                if (response.isSuccessful) {
+                    Log.d("Profile", "Imagen subida")
+                } else {
+                    Log.e("Profile", "Error al subir imagen")
+                }
+            } catch (e: Exception) {
+                Log.e("Profile", "Exception: ${e.message}")
+            }
+        }
+    }
+
 
     fun clearMsg() = _ui.update { it.copy(msg = null) }
 
     private fun uriToTempFile(context: Context, uri: Uri): File {
-        // Comprime y limita (1024x1024, ~700 KB)
         return Data.media.ImageCompressor
             .compressToTempFile(context, uri)
     }
