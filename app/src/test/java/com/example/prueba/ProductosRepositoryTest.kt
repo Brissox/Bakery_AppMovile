@@ -8,14 +8,12 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import retrofit2.Response
 
-class ProductoRepositoryTest : StringSpec({
+class ProductosRepositoryTest : StringSpec({
 
     "listar productos debe devolver lista simulada correctamente" {
 
-        // Mock del servicio API
         val mockApi = mockk<ApiBackendService>()
 
-        // Lista simulada de productos
         val productosMock = listOf(
             ProductoResp(
                 NOMBRE = "Producto A",
@@ -39,10 +37,8 @@ class ProductoRepositoryTest : StringSpec({
             )
         )
 
-        // Simula la llamada suspend a la API
         coEvery { mockApi.listarProductos() } returns Response.success(productosMock)
 
-        // Repositorio simple que usa mockApi
         class ProductoRepository(private val api: ApiBackendService) {
             suspend fun listarProductos(): List<ProductoResp> {
                 val resp = api.listarProductos()
@@ -52,10 +48,8 @@ class ProductoRepositoryTest : StringSpec({
 
         val repo = ProductoRepository(mockApi)
 
-        // Ejecutamos la función
         val lista = kotlinx.coroutines.runBlocking { repo.listarProductos() }
 
-        // Validamos resultados
         lista.size shouldBe 2
         lista[0].NOMBRE shouldBe "Producto A"
         lista[1].PRECIO shouldBe 200

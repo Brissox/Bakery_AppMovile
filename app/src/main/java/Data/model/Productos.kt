@@ -7,7 +7,7 @@ data class ProductoResponse(
 data class EmbeddedData(
     val productoList: List<Productos>
 )
-// Modelo que coincide con la respuesta del backend
+
 data class Productos(
     val id_producto: Long,
     val nombre: String,

@@ -15,7 +15,6 @@ class ProductoViewModel : ViewModel() {
     private val _productList = MutableStateFlow<List<Productos>>(emptyList())
     val productoList: StateFlow<List<Productos>> = _productList
 
-    // Estado para errores
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 

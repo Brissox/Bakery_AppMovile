@@ -30,7 +30,7 @@ import viewmodel.ProductoViewModel
 @Composable
 fun ProductScreen(
     viewModel: ProductoViewModel,
-    // Opcional: puedes pasar estos VMs desde fuera si quieres compartir estado
+    
     cartViewModel: CartViewModel = viewModel(), 
     favoritosViewModel: FavoritosViewModel = viewModel()
 ) {
@@ -64,7 +64,7 @@ fun ProductScreen(
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else {
-                // Usamos LazyVerticalGrid con 2 columnas fijas, igual que en la pantalla Principal
+                
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     contentPadding = PaddingValues(16.dp),
